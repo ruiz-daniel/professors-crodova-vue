@@ -15,7 +15,7 @@ const queryStudentsFromPlanification =
   "WHERE group_planning.group_planning_id = ?";
 
 const querySelectGroup =
-  "SELECT group_planning_id, group_id, group_name, subject_id, subject_name " +
+  "SELECT group_planning_id, group_id, group_name, subject_id, subject_name, subject_hours " +
   "FROM group_planning " +
   "JOIN student_group ON student_group.group_id = group_planning.group_fk " +
   "JOIN subject ON subject.subject_id = group_planning.subject_fk " +
@@ -57,7 +57,7 @@ const queryUpdateEvaluativeCuts =
 
 const queryUpdateAssist =
   "UPDATE assist " +
-  "SET assist_first_turn = ?, assist_second_turn = ?, assist_updated = ? " +
+  "SET assist_first_turn = ?, assist_second_turn = ?, assist_updated = ? assist_modified = ? " +
   "WHERE assist_student_fk = ? AND assist_subject_fk = ? AND assist_date = ? AND assist_activity_type_fk = ? ";
 
 const queryUpdatePeriodicEvaluation =
@@ -71,6 +71,28 @@ const queryEvaluativeCutsFromGroup =
   "FROM student_cut " +
   "JOIN evaluative_cut ON evaluative_cut.cut_group_planning_id = student_cut.student_cut_evaluative_cut_fk " +
   "JOIN student ON student.student_id = student_cut.student_cut_student_fk WHERE cut_group_planning_id = ?";
+
+const queryAssistForUpdate =
+  "SELECT * FROM assist JOIN teacher_data WHERE assist_updated = 'false'";
+
+const queryCutsForUpdate =
+  "SELECT cut_group_planning_id, teacher_name, student_id, student_name, student_cut_assist_percent, " +
+  "student_cut_cualitative_evaluation1, student_cut_cualitative_evaluation2, cut_first_court_header_id, cut_second_court_header_id " +
+  "FROM evaluative_cut " +
+  "JOIN student_cut ON evaluative_cut.cut_group_planning_id = student_cut.student_cut_evaluative_cut_fk " +
+  "JOIN teacher_data " +
+  "JOIN student ON student.student_id = student_cut.student_cut_student_fk " +
+  "WHERE student_cut_updated = 'false'";
+
+const queryPeriodicEvaluationsForUpdate =
+  "SELECT periodic_evaluation_student_fk, periodic_evaluation_value, periodic_evaluation_date, periodic_evaluation_type_fk, " +
+  "periodic_evaluation_subject_fk, periodic_evaluation_group_fk, periodic_evaluation_week, periodic_evaluation_modified, teacher_id, teacher_name " +
+  "FROM periodic_evaluation " +
+  "JOIN teacher_data " +
+  "WHERE periodic_evaluation_updated = 'false'";
+
+const queryEndEvaluationsForUpdate =
+  "SELECT * FROM end_evaluation JOIN teacher_data WHERE end_evaluation_updated = 'false'";
 
 export default {
   initDatabase() {
@@ -99,22 +121,26 @@ export default {
       this.createdTablesSuccess
     );
   },
+  resetDatabase() {
+    database.transaction(function(tx) {
+      tx.executeSql("DROP TABLE IF EXISTS teacher_data");
+      tx.executeSql("DROP TABLE IF EXISTS student_group");
+      tx.executeSql("DROP TABLE IF EXISTS group_planning");
+      tx.executeSql("DROP TABLE IF EXISTS subject");
+      tx.executeSql("DROP TABLE IF EXISTS student");
+      tx.executeSql("DROP TABLE IF EXISTS assist");
+      tx.executeSql("DROP TABLE IF EXISTS end_evaluation");
+      tx.executeSql("DROP TABLE IF EXISTS periodic_evaluation");
+      tx.executeSql("DROP TABLE IF EXISTS evaluative_cut");
+      tx.executeSql("DROP TABLE IF EXISTS student_cut");
+      tx.executeSql("DROP TABLE IF EXISTS activity_type");
+      tx.executeSql("DROP TABLE IF EXISTS evaluation_value");
+      tx.executeSql("DROP TABLE IF EXISTS cualitative_evaluation");
+      tx.executeSql("DROP TABLE IF EXISTS periodic_evaluation_type");
+    });
+    this.createTables();
+  },
   queryTables(tx) {
-    tx.executeSql("DROP TABLE IF EXISTS teacher_data");
-    tx.executeSql("DROP TABLE IF EXISTS student_group");
-    tx.executeSql("DROP TABLE IF EXISTS group_planning");
-    tx.executeSql("DROP TABLE IF EXISTS subject");
-    tx.executeSql("DROP TABLE IF EXISTS student");
-    tx.executeSql("DROP TABLE IF EXISTS assist");
-    tx.executeSql("DROP TABLE IF EXISTS end_evaluation");
-    tx.executeSql("DROP TABLE IF EXISTS periodic_evaluation");
-    tx.executeSql("DROP TABLE IF EXISTS evaluative_cut");
-    tx.executeSql("DROP TABLE IF EXISTS student_cut");
-    tx.executeSql("DROP TABLE IF EXISTS activity_type");
-    tx.executeSql("DROP TABLE IF EXISTS evaluation_value");
-    tx.executeSql("DROP TABLE IF EXISTS cualitative_evaluation");
-    tx.executeSql("DROP TABLE IF EXISTS periodic_evaluation_type");
-
     tx.executeSql(
       "CREATE TABLE IF NOT EXISTS teacher_data (teacher_id unique, teacher_name)"
     );
@@ -125,14 +151,14 @@ export default {
       "CREATE TABLE IF NOT EXISTS group_planning (group_planning_id unique, group_fk, subject_fk)"
     );
     tx.executeSql(
-      "CREATE TABLE IF NOT EXISTS subject (subject_id unique, subject_name)"
+      "CREATE TABLE IF NOT EXISTS subject (subject_id unique, subject_name, subject_hours)"
     );
     tx.executeSql(
       "CREATE TABLE IF NOT EXISTS student (student_id unique, student_name, student_last_name, student_second_last_name, student_group_fk)"
     );
     tx.executeSql(
       "CREATE TABLE IF NOT EXISTS assist (assist_id, assist_date, assist_week, assist_activity_type_fk, assist_student_fk, assist_group_fk," +
-        "assist_teacher_fk, assist_subject_fk, assist_first_turn, assist_second_turn, assist_updated)"
+        "assist_teacher_fk, assist_subject_fk, assist_first_turn, assist_second_turn, assist_updated, assist_modified)"
     );
     tx.executeSql(
       "CREATE TABLE IF NOT EXISTS end_evaluation (end_evaluation_group_planning_id, examination_acta_ordinal_id, examination_acta_reval_id, examination_acta_extra_id," +
@@ -145,7 +171,7 @@ export default {
       "CREATE TABLE IF NOT EXISTS periodic_evaluation (periodic_evaluation_id, periodic_evaluation_type_fk," +
         "periodic_evaluation_username, periodic_evaluation_host, periodic_evaluation_canceled, periodic_evaluation_value," +
         "periodic_evaluation_date, periodic_evaluation_subject_fk, periodic_evaluation_group_fk, periodic_evaluation_week," +
-        "periodic_evaluation_student_fk, periodic_evaluation_deleted, periodic_evaluation_updated)"
+        "periodic_evaluation_student_fk, periodic_evaluation_deleted, periodic_evaluation_updated, periodic_evaluation_modified)"
     );
     tx.executeSql(
       "CREATE TABLE IF NOT EXISTS evaluative_cut (cut_group_planning_id unique, cut_first_court_header_id, cut_second_court_header_id, cut_first_delivered, cut_second_delivered)"
@@ -226,8 +252,8 @@ export default {
     subjectsData.forEach(element => {
       database.transaction(function(tx) {
         tx.executeSql(
-          "INSERT INTO subject (subject_id , subject_name) VALUES (?, ?) ",
-          [element.ID_SIGENU, element.Name]
+          "INSERT INTO subject (subject_id , subject_name, subject_hours) VALUES (?, ?, ?) ",
+          [element.ID_SIGENU, element.Name, element.Hours]
         );
       }, this.txError);
     });
@@ -238,7 +264,7 @@ export default {
         function(tx) {
           tx.executeSql(
             "INSERT INTO assist (assist_id, assist_date, assist_week, assist_activity_type_fk, assist_student_fk, assist_group_fk," +
-              "assist_teacher_fk, assist_subject_fk, assist_first_turn, assist_second_turn, assist_updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ",
+              "assist_teacher_fk, assist_subject_fk, assist_first_turn, assist_second_turn, assist_updated, assist_modified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ",
             [
               element.ID_SIGENU,
               element.Date,
@@ -250,7 +276,8 @@ export default {
               element.Subject,
               element.First_Turn,
               element.Second_Turn,
-              element.updated
+              element.updated,
+              element.modified
             ]
           );
         },
@@ -302,7 +329,7 @@ export default {
           "INSERT INTO periodic_evaluation (periodic_evaluation_id, periodic_evaluation_type_fk," +
             "periodic_evaluation_username, periodic_evaluation_host, periodic_evaluation_canceled, periodic_evaluation_value," +
             "periodic_evaluation_date, periodic_evaluation_subject_fk, periodic_evaluation_group_fk, periodic_evaluation_week," +
-            "periodic_evaluation_student_fk, periodic_evaluation_deleted, periodic_evaluation_updated) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            "periodic_evaluation_student_fk, periodic_evaluation_deleted, periodic_evaluation_updated, periodic_evaluation_modified) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
           [
             element.ID_SIGENU,
             element.Periodic_Evaluation_Type,
@@ -316,7 +343,8 @@ export default {
             element.Week,
             element.Student,
             element.Deleted,
-            element.Updated
+            element.Updated,
+            element.Modified
           ]
         );
       }, this.txError);
@@ -445,7 +473,8 @@ export default {
           GroupID: results.rows.item(0).group_id,
           SubjectID: results.rows.item(0).subject_id,
           GroupName: results.rows.item(0).group_name,
-          SubjectName: results.rows.item(0).subject_name
+          SubjectName: results.rows.item(0).subject_name,
+          SubjectHours: results.rows.item(0).subject_hours
         };
         fn(info);
       });
@@ -665,6 +694,7 @@ export default {
           assist.FirstTurn,
           assist.SecondTurn,
           assist.Updated,
+          assist.Modified,
           assist.StudentID,
           assist.SubjectID,
           assist.Date,
@@ -693,5 +723,225 @@ export default {
         }
       );
     });
+  },
+
+  //Get info for updates on server.........................................
+
+  getAssistsForUpdate(fn) {
+    var assists = [];
+    database.transaction(function(tx) {
+      tx.executeSql(queryAssistForUpdate, [], function(tx, results) {
+        for (let i = 0; i < results.rows.length; i++) {
+          assists.push({
+            Date: results.rows.item(i).assist_date,
+            Week: results.rows.item(i).assist_week,
+            Activity_Type: results.rows.item(i).assist_activity_type_fk,
+            Student: results.rows.item(i).assist_student_fk,
+            Group: results.rows.item(i).assist_group_fk,
+            Teacher: results.rows.item(i).teacher_id,
+            Teacher_Name: results.rows.item(i).teacher_name,
+            Subject: results.rows.item(i).assist_subject_fk,
+            First_Turn: results.rows.item(i).assist_first_turn,
+            Second_Turn: results.rows.item(i).assist_second_turn,
+            Modified: results.rows.item(i).assist_modified
+          });
+        }
+        fn(assists);
+      });
+    });
+  },
+
+  getEvaluativeCutsForUpdate(fn) {
+    var cuts = [];
+    database.transaction(function(tx) {
+      tx.executeSql(queryCutsForUpdate, [], function(tx, results) {
+        for (let i = 0; i < results.rows.length; i++) {
+          if (
+            results.rows.item(i).student_cut_cualitative_evaluation1 !==
+            "undefined"
+          ) {
+            cuts.push({
+              GroupPlanningID: results.rows.item(i).cut_group_planning_id,
+              Teacher_Name: results.rows.item(i).teacher_name,
+              Cut: "01",
+              Student_ID: results.rows.item(i).student_id,
+              Student_Name: results.rows.item(i).student_name,
+              AssistPercent: results.rows.item(i).student_cut_assist_percent,
+              Evaluation: results.rows.item(i)
+                .student_cut_cualitative_evaluation1
+            });
+          }
+          if (
+            results.rows.item(i).student_cut_cualitative_evaluation2 !==
+            "undefined"
+          ) {
+            cuts.push({
+              GroupPlanningID: results.rows.item(i).cut_group_planning_id,
+              Teacher_Name: results.rows.item(i).teacher_name,
+              Cut: "02",
+              Student_ID: results.rows.item(i).student_id,
+              Student_Name: results.rows.item(i).student_name,
+              AssistPercent: results.rows.item(i).student_cut_assist_percent,
+              Evaluation: results.rows.item(i)
+                .student_cut_cualitative_evaluation2
+            });
+          }
+        }
+        fn(cuts);
+      });
+    });
+  },
+  getPeriodicdEvaluationsForUpdate(fn) {
+    var evaluations = [];
+    database.transaction(function(tx) {
+      tx.executeSql(queryPeriodicEvaluationsForUpdate, [], function(
+        tx,
+        results
+      ) {
+        for (let i = 0; i < results.rows.length; i++) {
+          evaluations.push({
+            Student_ID: results.rows.item(i).periodic_evaluation_student_fk,
+            Evaluation_Value: results.rows.item(i).periodic_evaluation_value,
+            Periodic_Evaluation_Type_ID: results.rows.item(i)
+              .periodic_evaluation_type_fk,
+            Date: results.rows.item(i).periodic_evaluation_date,
+            Subject_ID: results.rows.item(i).periodic_evaluation_subject_fk,
+            Group_ID: results.rows.item(i).periodic_evaluation_group_fk,
+            Week: results.rows.item(i).periodic_evaluation_week,
+            Teacher_ID: results.rows.item(i).teacher_id,
+            Teacher_Name: results.rows.item(i).teacher_name,
+            Modified: results.rows.item(i).periodic_evaluation_modified
+          });
+        }
+        fn(evaluations);
+      });
+    });
+  },
+  getEndEvaluationsForUpdate(fn) {
+    var evaluations = [];
+    database.transaction(function(tx) {
+      tx.executeSql(queryEndEvaluationsForUpdate, [], function(tx, results) {
+        for (let i = 0; i < results.rows.length; i++) {
+          if (
+            results.rows.item(i).ordinal_exam_evaluation_value_id !==
+              "undefined" &&
+            results.rows.item(i).examination_acta_ordinal_id !== "undefined"
+          ) {
+            evaluations.push({
+              Group_ID: results.rows.item(i).end_evaluation_group_fk,
+              Subject_ID: results.rows.item(i).end_evaluation_subject_fk,
+              ID_Acta: results.rows.item(i).examination_acta_ordinal_id,
+              Convocatoria: "01",
+              Exam_Evaluation: results.rows.item(i)
+                .ordinal_exam_evaluation_value_id,
+              Final_Evaluation: results.rows.item(i).final_evaluation_id,
+              Evaluation_ID: results.rows.item(i).ordinal_evaluation_id,
+              Student_ID: results.rows.item(i).end_evaluation_student_id,
+              Matriculated_Subject_ID: results.rows.item(i)
+                .matriculated_subject_id,
+              Teacher_Name: results.rows.item(i).teacher_name,
+              Update: true
+            });
+          } else if (
+            results.rows.item(i).ordinal_exam_evaluation_value_id !==
+              "undefined" &&
+            results.rows.item(i).examination_acta_ordinal_id === "undefined"
+          ) {
+            evaluations.push({
+              Group_ID: results.rows.item(i).end_evaluation_group_fk,
+              Subject_ID: results.rows.item(i).end_evaluation_subject_fk,
+              Convocatoria: "01",
+              Exam_Evaluation: results.rows.item(i)
+                .ordinal_exam_evaluation_value_id,
+              Final_Evaluation: results.rows.item(i).final_evaluation_id,
+              Student_ID: results.rows.item(i).end_evaluation_student_id,
+              Matriculated_Subject_ID: results.rows.item(i)
+                .matriculated_subject_id,
+              Teacher_Name: results.rows.item(i).teacher_name,
+              Update: false
+            });
+          }
+          if (
+            results.rows.item(i).rev_exam_evaluation_value_id !== "undefined" &&
+            results.rows.item(i).examination_acta_reval_id !== "undefined"
+          ) {
+            evaluations.push({
+              Group_ID: results.rows.item(i).end_evaluation_group_fk,
+              Subject_ID: results.rows.item(i).end_evaluation_subject_fk,
+              ID_Acta: results.rows.item(i).examination_acta_reval_id,
+              Convocatoria: "02",
+              Exam_Evaluation: results.rows.item(i)
+                .rev_exam_evaluation_value_id,
+              Final_Evaluation: results.rows.item(i).final_evaluation_id,
+              Evaluation_ID: results.rows.item(i).rev_evaluation_id,
+              Student_ID: results.rows.item(i).end_evaluation_student_id,
+              Matriculated_Subject_ID: results.rows.item(i)
+                .matriculated_subject_id,
+              Teacher_Name: results.rows.item(i).teacher_name,
+              Update: true
+            });
+          } else if (
+            results.rows.item(i).rev_exam_evaluation_value_id !== "undefined" &&
+            results.rows.item(i).examination_acta_reval_id === "undefined"
+          ) {
+            evaluations.push({
+              Group_ID: results.rows.item(i).end_evaluation_group_fk,
+              Subject_ID: results.rows.item(i).end_evaluation_subject_fk,
+              Convocatoria: "02",
+              Exam_Evaluation: results.rows.item(i)
+                .rev_exam_evaluation_value_id,
+              Final_Evaluation: results.rows.item(i).final_evaluation_id,
+              Student_ID: results.rows.item(i).end_evaluation_student_id,
+              Matriculated_Subject_ID: results.rows.item(i)
+                .matriculated_subject_id,
+              Teacher_Name: results.rows.item(i).teacher_name,
+              Update: false
+            });
+          }
+          if (
+            results.rows.item(i).extra_exam_evaluation_value_id !==
+              "undefined" &&
+            results.rows.item(i).examination_acta_extra_id !== "undefined"
+          ) {
+            evaluations.push({
+              Group_ID: results.rows.item(i).end_evaluation_group_fk,
+              Subject_ID: results.rows.item(i).end_evaluation_subject_fk,
+              ID_Acta: results.rows.item(i).examination_acta_extra_id,
+              Convocatoria: "03",
+              Exam_Evaluation: results.rows.item(i)
+                .extra_exam_evaluation_value_id,
+              Final_Evaluation: results.rows.item(i).final_evaluation_id,
+              Evaluation_ID: results.rows.item(i).extra_evaluation_id,
+              Student_ID: results.rows.item(i).end_evaluation_student_id,
+              Matriculated_Subject_ID: results.rows.item(i)
+                .matriculated_subject_id,
+              Teacher_Name: results.rows.item(i).teacher_name,
+              Update: true
+            });
+          } else if (
+            results.rows.item(i).extra_exam_evaluation_value_id !==
+              "undefined" &&
+            results.rows.item(i).examination_acta_extra_id === "undefined"
+          ) {
+            evaluations.push({
+              Group_ID: results.rows.item(i).end_evaluation_group_fk,
+              Subject_ID: results.rows.item(i).end_evaluation_subject_fk,
+              Convocatoria: "03",
+              Exam_Evaluation: results.rows.item(i)
+                .extra_exam_evaluation_value_id,
+              Final_Evaluation: results.rows.item(i).final_evaluation_id,
+              Student_ID: results.rows.item(i).end_evaluation_student_id,
+              Matriculated_Subject_ID: results.rows.item(i)
+                .matriculated_subject_id,
+              Teacher_Name: results.rows.item(i).teacher_name,
+              Update: false
+            });
+          }
+        }
+        fn(evaluations);
+      });
+    });
   }
+
+  //......................................................................
 };

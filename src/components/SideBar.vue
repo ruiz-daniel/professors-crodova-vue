@@ -42,6 +42,13 @@ export default {
           }
         },
         {
+          label: "Reiniciar Base de Datos local",
+          icon: "pi pi-refresh",
+          command: () => {
+            this.$root.Database.resetDatabase();
+          }
+        },
+        {
           label: "Actualizar Datos",
           items: [
             {
@@ -51,9 +58,27 @@ export default {
               }
             },
             {
-              label: "Desde el servidor"
+              label: "Desde el servidor",
+              command: () => {
+                this.$root.getAllDataFromServer();
+              }
             }
           ]
+        },
+        {
+          label: "Sincronizar datos con el servidor",
+          icon: "pi pi-upload",
+          command: () => {
+            this.$root.updateToServer();
+          }
+        },
+        {
+          label: "Configuraciones",
+          icon: "pi pi-cog",
+          command: () => {
+            this.$router.push({ name: "Configuration" });
+            this.$root.sideMenuVisible = false;
+          }
         }
       ]
     };

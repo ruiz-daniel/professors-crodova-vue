@@ -157,7 +157,8 @@ export default {
           Date: this.editAssist.Date,
           FirstTurn: this.parsePresenceToBoolean(this.editAssist.FirstTurn),
           SecondTurn: this.parsePresenceToBoolean(this.editAssist.SecondTurn),
-          Updated: false
+          Updated: false,
+          Modified: true
         },
         function() {
           toast.add({

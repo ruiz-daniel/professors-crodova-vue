@@ -8,6 +8,7 @@ import InsertEndEvaluations from "../views/InsertEndEvaluationsView";
 import InsertPeriodicEvaluation from "../views/InsertPeriodicEvaluationView";
 import RegisterCutView from "../views/RegisterCutView";
 import ActivitiesView from "../views/ActivitiesView";
+import ConfigurationView from "../views/ConfigurationView";
 
 Vue.use(VueRouter);
 
@@ -52,6 +53,11 @@ const routes = [
     path: "/Tasks",
     name: "Tasks",
     component: ActivitiesView
+  },
+  {
+    path: "/Configuration",
+    name: "Configuration",
+    component: ConfigurationView
   }
 ];
 

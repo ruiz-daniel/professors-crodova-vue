@@ -86,18 +86,30 @@ export default {
       return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
     },
     saveAssist() {
-      this.assists.forEach(element => {
-        element.Week = this.week;
-        element.Activity_Type = this.$store.getters.getActivityTypeIDFromName(
-          this.activity_type
-        );
-      });
-      var toast = this.$toast
-      this.$root.Database.insertAssists(this.assists, function(index, size){
-        if(index === size - 1)
-        toast.add({severity:'success', summary: 'Exito', detail:'Se han insertado las asistencias', life: 3000});
-      });
-      
+      var toast = this.$toast;
+      if (this.activity_type !== "" && Object.keys(this.week).length > 0) {
+        this.assists.forEach(element => {
+          element.Week = this.week;
+          element.Activity_Type = this.$store.getters.getActivityTypeIDFromName(
+            this.activity_type
+          );
+        });
+        this.$root.Database.insertAssists(this.assists, function(index, size) {
+          if (index === size - 1)
+            toast.add({
+              severity: "success",
+              summary: "Exito",
+              detail: "Se han insertado las asistencias",
+              life: 3000
+            });
+        });
+      } else
+        toast.add({
+          severity: "error",
+          summary: "Error",
+          detail: "Campos vacíos",
+          life: 3000
+        });
     }
   },
   created() {

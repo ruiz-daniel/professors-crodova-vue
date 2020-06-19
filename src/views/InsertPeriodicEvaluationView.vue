@@ -43,13 +43,7 @@
         :options="listEvaluationValues()"
         placeholder="Nota"
       />
-      <Button
-        icon="pi pi-plus"
-        v-on:click="
-          addtoInfo();
-          registerEvaluation();
-        "
-      />
+      <Button icon="pi pi-plus" v-on:click="registerEvaluation()" />
       <Button
         icon="pi pi-times"
         v-on:click="
@@ -131,25 +125,35 @@ export default {
     },
     registerEvaluation() {
       var toast = this.$toast;
-      if (this.evaluation_type !== null && this.week !== null && this.evaluation !== null)
-      this.$root.Database.insertPeriodicEvaluations([
-        {
-          Periodic_Evaluation_Type: this.evaluation_type.ID,
-          Cancelled: false,
-          Evaluation_Value: this.evaluation,
-          Date: new Date(),
-          Subject: this.$store.state.subjectID,
-          Grupo: this.$store.state.groupID,
-          Week: this.week,
-          Student: this.student.StudentID,
-          Deleted: false,
-          Updated: false,
-          User_Name: "",
-          Host: ""
-        }
-      ]);
-      else {
-        toast.add({severity:'error', summary: 'Error', detail:'Campos vacíos', life: 3000})
+      if (
+        Object.keys(this.evaluation_type).length > 0 &&
+        Object.keys(this.week).length > 0 &&
+        Object.keys(this.evaluation).length > 0
+      ) {
+        this.$root.Database.insertPeriodicEvaluations([
+          {
+            Periodic_Evaluation_Type: this.evaluation_type.ID,
+            Cancelled: false,
+            Evaluation_Value: this.evaluation,
+            Date: new Date(),
+            Subject: this.$store.state.subjectID,
+            Grupo: this.$store.state.groupID,
+            Week: this.week,
+            Student: this.student.StudentID,
+            Deleted: false,
+            Updated: false,
+            User_Name: "",
+            Host: ""
+          }
+        ]);
+        this.addtoInfo();
+      } else {
+        toast.add({
+          severity: "error",
+          summary: "Error",
+          detail: "Campos vacíos",
+          life: 3000
+        });
       }
     },
     toggle(event) {

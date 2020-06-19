@@ -14,6 +14,7 @@ export default new Vuex.Store({
     subjectID: {},
     groupName: {},
     subjectName: {},
+    subjectHours: {},
     students: {},
     activityTypes: {},
     evaluationValues: {},
@@ -65,6 +66,7 @@ export default new Vuex.Store({
       state.subjectID = groupData.SubjectID;
       state.groupName = groupData.GroupName;
       state.subjectName = groupData.SubjectName;
+      state.subjectHours = groupData.SubjectHours;
     },
     STATE_ACTION(state, action) {
       state.action = action;
