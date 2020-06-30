@@ -140,7 +140,7 @@ new Vue({
           });
         verifiedGroups.push(elementGroup.ID_SIGENU);
       });
-      Database.insertAssists(assistsData, function(index, size) {});
+      Database.insertAssists(assistsData, "", "");
     },
     verifyExistingGroup(array, group) {
       var exist = false;
@@ -304,23 +304,27 @@ new Vue({
       Database.getPeriodicdEvaluationsForUpdate(function(evaluations) {
         APICalls.updatePeriodicEvaluationsToServer(evaluations);
       });
+    },
+    getCodifiefs() {
+      Database.getTeacherData(function(data) {
+        store.commit("SET_TEACHER_DATA", data);
+      });
+      Database.getActivityTypes(function(results) {
+        store.commit("LOAD_ACTIVITY_TYPES", results);
+      });
+      Database.getPeriodicEvaluationTypes(function(results) {
+        store.commit("LOAD_PERIODIC_EVALUATION_TYPES", results);
+      });
+      Database.getEvaluationValues(function(results) {
+        store.commit("LOAD_EVALUATION_VALUES", results);
+      });
     }
   },
 
   mounted() {
     Database.initDatabase();
-    Database.getTeacherData(function(data) {
-      store.commit("SET_TEACHER_DATA", data);
-    });
-    Database.getActivityTypes(function(results) {
-      store.commit("LOAD_ACTIVITY_TYPES", results);
-    });
-    Database.getPeriodicEvaluationTypes(function(results) {
-      store.commit("LOAD_PERIODIC_EVALUATION_TYPES", results);
-    });
-    Database.getEvaluationValues(function(results) {
-      store.commit("LOAD_EVALUATION_VALUES", results);
-    });
+    this.getCodifiefs();
+    Database.setToastService(this.$toast);
   },
   render: h => h(App)
 }).$mount("#app");

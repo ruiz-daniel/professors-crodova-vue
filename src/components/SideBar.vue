@@ -42,13 +42,6 @@ export default {
           }
         },
         {
-          label: "Reiniciar Base de Datos local",
-          icon: "pi pi-refresh",
-          command: () => {
-            this.$root.Database.resetDatabase();
-          }
-        },
-        {
           label: "Actualizar Datos",
           items: [
             {
@@ -61,6 +54,13 @@ export default {
               label: "Desde el servidor",
               command: () => {
                 this.$root.getAllDataFromServer();
+              }
+            },
+            {
+              label: "Reiniciar Base de Datos local",
+              icon: "pi pi-refresh",
+              command: () => {
+                this.$root.Database.resetDatabase();
               }
             }
           ]

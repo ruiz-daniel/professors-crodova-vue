@@ -32,7 +32,7 @@ export default {
   /* margin-top: 60px; */
 }
 #container {
-  padding: 30px;
+  padding: 2%;
   display: grid;
   grid-template-columns: auto auto;
 }

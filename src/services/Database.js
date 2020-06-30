@@ -1,6 +1,8 @@
 /* eslint-disable no-unused-vars */
 var database = {};
-//Queries......................................................................................
+var toastService;
+//Queries......................................................................................................................................
+//SELECT QUERIES...............................................................................
 const queryPlanifications =
   "SELECT group_planning_id, subject_name, group_name " +
   "FROM student_group " +
@@ -45,6 +47,14 @@ const queryPeriodicEvaluationsFromStudentAndSubject =
 const queryEndEvaluationsFromPlanification =
   "SELECT * FROM end_evaluation WHERE end_evaluation_group_planning_id = ?";
 
+const queryEvaluativeCutsFromGroup =
+  "SELECT cut_group_planning_id, cut_first_delivered, cut_second_delivered, student_cut_abscent_hours_cut1, student_cut_abscent_hours_cut2, student_cut_assist_percent, " +
+  "student_cut_cualitative_evaluation1, student_cut_cualitative_evaluation2, student_id, student_name " +
+  "FROM student_cut " +
+  "JOIN evaluative_cut ON evaluative_cut.cut_group_planning_id = student_cut.student_cut_evaluative_cut_fk " +
+  "JOIN student ON student.student_id = student_cut.student_cut_student_fk WHERE cut_group_planning_id = ?";
+
+//UPDATE QUERIES....................................................................................................................................................
 const queryUpdateEndEvaluations =
   "UPDATE end_evaluation " +
   "SET ordinal_exam_evaluation_value_id = ?, rev_exam_evaluation_value_id = ?, extra_exam_evaluation_value_id = ?, final_evaluation_id = ?, end_evaluation_updated = ? " +
@@ -65,13 +75,11 @@ const queryUpdatePeriodicEvaluation =
   "SET periodic_evaluation_value = ?, periodic_evaluation_updated = ?" +
   "WHERE periodic_evaluation_student_fk = ? AND periodic_evaluation_subject_fk = ? AND periodic_evaluation_date = ? AND periodic_evaluation_type_fk = ?";
 
-const queryEvaluativeCutsFromGroup =
-  "SELECT cut_group_planning_id, cut_first_delivered, cut_second_delivered, " +
-  "student_cut_cualitative_evaluation1, student_cut_cualitative_evaluation2, student_id, student_name " +
-  "FROM student_cut " +
-  "JOIN evaluative_cut ON evaluative_cut.cut_group_planning_id = student_cut.student_cut_evaluative_cut_fk " +
-  "JOIN student ON student.student_id = student_cut.student_cut_student_fk WHERE cut_group_planning_id = ?";
+const queryUpdateCutAssistData =
+  "UPDATE student_cut SET student_cut_abscent_hours_cut1 = ?, student_cut_abscent_hours_cut2 = ?, student_cut_assist_percent = ? " +
+  "WHERE student_cut_evaluative_cut_fk = ? AND student_cut_student_fk = ?";
 
+//SELECT BEFORE UPDATE QUERIES..........................................................................................................................................
 const queryAssistForUpdate =
   "SELECT * FROM assist JOIN teacher_data WHERE assist_updated = 'false'";
 
@@ -95,6 +103,9 @@ const queryEndEvaluationsForUpdate =
   "SELECT * FROM end_evaluation JOIN teacher_data WHERE end_evaluation_updated = 'false'";
 
 export default {
+  setToastService(toast) {
+    toastService = toast;
+  },
   initDatabase() {
     database = window.openDatabase(
       "professorsDB",
@@ -109,9 +120,19 @@ export default {
   },
   createdTablesSuccess() {
     console.log("Created tables OK");
+    toastService.add({
+      severity: "success",
+      detail: "Tablas Creadas",
+      life: 3000
+    });
   },
-  txSuccess() {
-    console.log("Transaction completed OK");
+  txSuccess(msg) {
+    toastService.add({
+      severity: "success",
+      detail: msg,
+      life: 3000
+    });
+    console.log(msg);
   },
   //..........................................................................................
   createTables() {
@@ -122,22 +143,39 @@ export default {
     );
   },
   resetDatabase() {
-    database.transaction(function(tx) {
-      tx.executeSql("DROP TABLE IF EXISTS teacher_data");
-      tx.executeSql("DROP TABLE IF EXISTS student_group");
-      tx.executeSql("DROP TABLE IF EXISTS group_planning");
-      tx.executeSql("DROP TABLE IF EXISTS subject");
-      tx.executeSql("DROP TABLE IF EXISTS student");
-      tx.executeSql("DROP TABLE IF EXISTS assist");
-      tx.executeSql("DROP TABLE IF EXISTS end_evaluation");
-      tx.executeSql("DROP TABLE IF EXISTS periodic_evaluation");
-      tx.executeSql("DROP TABLE IF EXISTS evaluative_cut");
-      tx.executeSql("DROP TABLE IF EXISTS student_cut");
-      tx.executeSql("DROP TABLE IF EXISTS activity_type");
-      tx.executeSql("DROP TABLE IF EXISTS evaluation_value");
-      tx.executeSql("DROP TABLE IF EXISTS cualitative_evaluation");
-      tx.executeSql("DROP TABLE IF EXISTS periodic_evaluation_type");
-    });
+    database.transaction(
+      function(tx) {
+        tx.executeSql("DROP TABLE IF EXISTS teacher_data");
+        tx.executeSql("DROP TABLE IF EXISTS student_group");
+        tx.executeSql("DROP TABLE IF EXISTS group_planning");
+        tx.executeSql("DROP TABLE IF EXISTS subject");
+        tx.executeSql("DROP TABLE IF EXISTS student");
+        tx.executeSql("DROP TABLE IF EXISTS assist");
+        tx.executeSql("DROP TABLE IF EXISTS end_evaluation");
+        tx.executeSql("DROP TABLE IF EXISTS periodic_evaluation");
+        tx.executeSql("DROP TABLE IF EXISTS evaluative_cut");
+        tx.executeSql("DROP TABLE IF EXISTS student_cut");
+        tx.executeSql("DROP TABLE IF EXISTS activity_type");
+        tx.executeSql("DROP TABLE IF EXISTS evaluation_value");
+        tx.executeSql("DROP TABLE IF EXISTS cualitative_evaluation");
+        tx.executeSql("DROP TABLE IF EXISTS periodic_evaluation_type");
+      },
+      function(err) {
+        console.log(err.message);
+        toastService.add({
+          severity: "error",
+          detail: "Error al reiniciar base de datos",
+          life: 3000
+        });
+      },
+      function() {
+        toastService.add({
+          severity: "success",
+          detail: "Base de datos reiniciada",
+          life: 3000
+        });
+      }
+    );
     this.createTables();
   },
   queryTables(tx) {
@@ -204,11 +242,12 @@ export default {
         );
       },
       this.txError,
-      this.txSuccess
+      this.txSuccess("Insertados datos del profesor")
     );
   },
 
   insertGroups(groupsData) {
+    var count = 0;
     groupsData.forEach(element => {
       database.transaction(
         function(tx) {
@@ -216,74 +255,153 @@ export default {
             "INSERT INTO student_group (group_id, group_name) VALUES (?, ?)",
             [element.ID_SIGENU, element.Grupo]
           );
+          count++;
         },
         this.txError,
-        this.txSuccess
+        function() {
+          if (count === groupsData.length) {
+            toastService.add({
+              severity: "success",
+              detail: "Insertados los grupos",
+              life: 3000
+            });
+            console.log("Insertados los grupos");
+          }
+        }
       );
     });
   },
   insertStudents(studentsData) {
+    var count = 0;
     studentsData.forEach(element => {
-      database.transaction(function(tx) {
-        tx.executeSql(
-          "INSERT INTO student (student_id, student_name, student_last_name, student_second_last_name, student_group_fk) VALUES (?, ?, ?, ?, ?)",
-          [
-            element.student.ID_SIGENU,
-            element.student.Name,
-            element.student.Last_Name,
-            element.student.Second_Last_Name,
-            element.groupID
-          ]
-        );
-      }, this.txError);
-    });
-  },
-  insertGroupPlannings(planningData) {
-    planningData.forEach(element => {
-      database.transaction(function(tx) {
-        tx.executeSql(
-          "INSERT INTO group_planning (group_planning_id, group_fk, subject_fk) VALUES (?, ?, ?) ",
-          [element.GrupoPlanningID, element.ID_SIGENU, element.SubjectID]
-        );
-      }, this.txError);
-    });
-  },
-  insertSubjects(subjectsData) {
-    subjectsData.forEach(element => {
-      database.transaction(function(tx) {
-        tx.executeSql(
-          "INSERT INTO subject (subject_id , subject_name, subject_hours) VALUES (?, ?, ?) ",
-          [element.ID_SIGENU, element.Name, element.Hours]
-        );
-      }, this.txError);
-    });
-  },
-  insertAssists(assistsData, fn) {
-    assistsData.forEach((element, index) => {
       database.transaction(
         function(tx) {
           tx.executeSql(
-            "INSERT INTO assist (assist_id, assist_date, assist_week, assist_activity_type_fk, assist_student_fk, assist_group_fk," +
-              "assist_teacher_fk, assist_subject_fk, assist_first_turn, assist_second_turn, assist_updated, assist_modified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ",
+            "INSERT INTO student (student_id, student_name, student_last_name, student_second_last_name, student_group_fk) VALUES (?, ?, ?, ?, ?)",
             [
-              element.ID_SIGENU,
-              element.Date,
-              element.Week,
-              element.Activity_Type,
-              element.Student,
-              element.Grupo,
-              element.Teacher,
-              element.Subject,
-              element.First_Turn,
-              element.Second_Turn,
-              element.updated,
-              element.modified
+              element.student.ID_SIGENU,
+              element.student.Name,
+              element.student.Last_Name,
+              element.student.Second_Last_Name,
+              element.groupID
             ]
           );
+          count++;
         },
         this.txError,
         function() {
-          fn(index, assistsData.length);
+          if (count === studentsData.length) {
+            toastService.add({
+              severity: "success",
+              detail: "Insertados los estudiantes",
+              life: 3000
+            });
+            console.log("Insertados los estudiantes");
+          }
+        }
+      );
+    });
+  },
+  insertGroupPlannings(planningData) {
+    database.transaction(
+      function(tx) {
+        planningData.forEach(element => {
+          tx.executeSql(
+            "INSERT INTO group_planning (group_planning_id, group_fk, subject_fk) VALUES (?, ?, ?) ",
+            [element.GrupoPlanningID, element.ID_SIGENU, element.SubjectID]
+          );
+        });
+      },
+      this.txError,
+      this.txSuccess("Insertadas las planificaciones")
+    );
+  },
+  insertSubjects(subjectsData) {
+    database.transaction(
+      function(tx) {
+        subjectsData.forEach(element => {
+          tx.executeSql(
+            "INSERT INTO subject (subject_id , subject_name, subject_hours) VALUES (?, ?, ?) ",
+            [element.ID_SIGENU, element.Name, element.Hours]
+          );
+        });
+      },
+      this.txError,
+      this.txSuccess("Insertadas las asignaturas")
+    );
+  },
+  insertAssists(assistsData, groupPlanningID, subjectHours) {
+    this.getEvaluativeCutsFromGroup(groupPlanningID, function(cuts) {
+      database.transaction(
+        function(tx) {
+          assistsData.forEach((element, index) => {
+            tx.executeSql(
+              "INSERT INTO assist (assist_id, assist_date, assist_week, assist_activity_type_fk, assist_student_fk, assist_group_fk," +
+                "assist_teacher_fk, assist_subject_fk, assist_first_turn, assist_second_turn, assist_updated, assist_modified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ",
+              [
+                element.ID_SIGENU,
+                element.Date,
+                element.Week,
+                element.Activity_Type,
+                element.Student,
+                element.Grupo,
+                element.Teacher,
+                element.Subject,
+                element.First_Turn,
+                element.Second_Turn,
+                element.updated,
+                element.modified
+              ]
+            );
+            if (groupPlanningID !== "" && subjectHours !== "") {
+              cuts.forEach(elementCut => {
+                if (elementCut.StudentID === element.Student) {
+                  var absenceHours = parseInt(elementCut.AbsenceHoursCut1);
+                  if (
+                    elementCut.AbsenceHoursCut2 > elementCut.AbsenceHoursCut1
+                  ) {
+                    absenceHours = parseInt(elementCut.AbsenceHoursCut2);
+                    if (!element.First_Turn) absenceHours += 1;
+                    if (!element.Second_Turn) absenceHours += 1;
+                    let assistPercent = (absenceHours / subjectHours) * 100;
+                    tx.executeSql(queryUpdateCutAssistData, [
+                      elementCut.AbsenceHoursCut1,
+                      absenceHours,
+                      assistPercent,
+                      groupPlanningID,
+                      element.Student
+                    ]);
+                  } else {
+                    if (!element.First_Turn) absenceHours += 1;
+                    if (!element.Second_Turn) absenceHours += 1;
+                    let assistPercent = (absenceHours / subjectHours) * 100;
+                    tx.executeSql(queryUpdateCutAssistData, [
+                      absenceHours,
+                      absenceHours,
+                      assistPercent,
+                      groupPlanningID,
+                      element.Student
+                    ]);
+                  }
+                }
+              });
+            }
+          });
+        },
+        function(error) {
+          console.log(error);
+          toastService.add({
+            severity: "error",
+            detail: "Error al guardar las asistencias",
+            life: 3000
+          });
+        },
+        function() {
+          toastService.add({
+            severity: "success",
+            detail: "Se han guardado las asistencias",
+            life: 3000
+          });
         }
       );
     });
@@ -319,9 +437,10 @@ export default {
             element.Updated
           ]
         );
-      }, this.txError);
+      });
     });
   },
+
   insertPeriodicEvaluations(evaluationsData) {
     evaluationsData.forEach(element => {
       database.transaction(function(tx) {
@@ -599,7 +718,12 @@ export default {
             CualitativeEvaluation2: results.rows.item(i)
               .student_cut_cualitative_evaluation2,
             StudentID: results.rows.item(i).student_id,
-            StudentName: results.rows.item(i).student_name
+            StudentName: results.rows.item(i).student_name,
+            AbsenceHoursCut1: results.rows.item(i)
+              .student_cut_abscent_hours_cut1,
+            AbsenceHoursCut2: results.rows.item(i)
+              .student_cut_abscent_hours_cut2,
+            AssistPercent: results.rows.item(i).student_cut_assist_percent
           });
         }
         fn(cuts);

@@ -2,7 +2,7 @@
   <div class="container">
     <Card id="card" class="p-shadow-2">
       <template slot="header">
-        <img alt="user header" src="@/assets/listing.png" />
+        <img alt="planificaciones" src="@/assets/listing.png" />
       </template>
       <template slot="title">
         Planificaciones
@@ -31,7 +31,7 @@
 
     <Card id="card" class="p-shadow-2">
       <template slot="header">
-        <img alt="user header" src="@/assets/tasks.png" />
+        <img alt="tareas" src="@/assets/tasks.png" />
       </template>
       <template slot="title">
         Tareas
@@ -66,9 +66,4 @@ export default {
 };
 </script>
 
-<style scoped>
-.init {
-  margin: 0 auto;
-  align-self: center;
-}
-</style>
+<style scoped></style>

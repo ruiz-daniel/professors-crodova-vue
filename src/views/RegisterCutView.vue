@@ -12,7 +12,7 @@
       />
     </div>
     <DataTable :value="cuts">
-      <Column field="student" header="Estudiante">
+      <Column field="student" header="Est.">
         <template #body="slotProps">
           {{ slotProps.data.StudentName }}
         </template>
@@ -33,6 +33,11 @@
             :options="evaluationsOptions"
             placeholder="NE"
           />
+        </template>
+      </Column>
+      <Column field="AssistPerecent" header="Ausenc.">
+        <template #body="slotProps">
+          {{slotProps.data.AssistPercent +"%"}}
         </template>
       </Column>
     </DataTable>

@@ -87,22 +87,27 @@ export default {
     },
     saveAssist() {
       var toast = this.$toast;
-      if (this.activity_type !== "" && Object.keys(this.week).length > 0) {
+      if (this.activity_type !== "" && this.week > 0) {
         this.assists.forEach(element => {
           element.Week = this.week;
           element.Activity_Type = this.$store.getters.getActivityTypeIDFromName(
             this.activity_type
           );
         });
-        this.$root.Database.insertAssists(this.assists, function(index, size) {
-          if (index === size - 1)
-            toast.add({
-              severity: "success",
-              summary: "Exito",
-              detail: "Se han insertado las asistencias",
-              life: 3000
-            });
-        });
+        this.$root.Database.insertAssists(
+          this.assists,
+          this.$store.state.groupPlanningID,
+          this.$store.state.subjectHours,
+          function(index, size) {
+            if (index === size - 1)
+              toast.add({
+                severity: "success",
+                summary: "Exito",
+                detail: "Se han insertado las asistencias",
+                life: 3000
+              });
+          }
+        );
       } else
         toast.add({
           severity: "error",
