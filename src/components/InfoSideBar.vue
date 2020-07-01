@@ -11,6 +11,8 @@
       <i class="pi pi-user" style="fontSize: 3em"></i>
       <h3>{{ $store.state.selectedStudent.StudentName }}</h3>
       <DataTable
+        :paginator="true"
+        :rows="5"
         :value="this.$store.state.info"
         v-if="$store.state.infoType === 'showAssists'"
       >
@@ -26,12 +28,12 @@
         </Column>
         <Column field="FirstTurn" header="1er Turno">
           <template #body="slotProps">
-            {{ slotProps.data.FirstTurn.slice(0, 8) }}
+            {{ slotProps.data.FirstTurn.slice(0, 6) }}
           </template>
         </Column>
         <Column field="SecondTurn" header="2do Turno">
           <template #body="slotProps">
-            {{ slotProps.data.SecondTurn.slice(0, 8) }}
+            {{ slotProps.data.SecondTurn.slice(0, 6) }}
           </template>
         </Column>
         <Column field="Edit" header="Editar">
@@ -48,6 +50,9 @@
       </DataTable>
       <DataTable
         :value="this.$store.state.info"
+        :autoLayout="true"
+        :paginator="true"
+        :rows="5"
         v-if="$store.state.infoType === 'showPeriodic'"
       >
         <Column field="TypeEv" header="Ev.">
@@ -65,7 +70,7 @@
             {{ slotProps.data.Date }}
           </template>
         </Column>
-        <Column field="Evaluation" header="Evaluación">
+        <Column field="Evaluation" header="Nota">
           <template #body="slotProps">
             {{ slotProps.data.EvaluationValue }}
           </template>

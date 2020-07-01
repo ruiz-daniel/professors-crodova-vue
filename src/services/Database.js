@@ -31,7 +31,7 @@ const queryAssistFromStudentAndSubject =
   "JOIN student ON assist.assist_student_fk = student.student_id " +
   "JOIN subject ON subject.subject_id = assist.assist_subject_fk " +
   "JOIN activity_type ON activity_type.activity_type_id = assist.assist_activity_type_fk " +
-  "WHERE student_id = ? AND subject_id = ?";
+  "WHERE student_id = ? AND subject_id = ? ORDER BY assist_week";
 
 const queryPeriodicEvaluationsFromStudentAndSubject =
   "SELECT DISTINCT periodic_evaluation_type_code, periodic_evaluation_id, periodic_evaluation_type_fk," +
@@ -42,7 +42,7 @@ const queryPeriodicEvaluationsFromStudentAndSubject =
   "JOIN periodic_evaluation_type ON periodic_evaluation_type.periodic_evaluation_type_id = periodic_evaluation.periodic_evaluation_type_fk " +
   "JOIN student ON student.student_id = periodic_evaluation.periodic_evaluation_student_fk " +
   "JOIN subject ON subject.subject_id = periodic_evaluation.periodic_evaluation_subject_fk " +
-  "WHERE student_id = ? AND subject_id = ?";
+  "WHERE student_id = ? AND subject_id = ? ORDER BY periodic_evaluation_week";
 
 const queryEndEvaluationsFromPlanification =
   "SELECT * FROM end_evaluation WHERE end_evaluation_group_planning_id = ?";
@@ -113,6 +113,7 @@ export default {
       "Professors DB",
       2000000
     );
+    this.createTables();
   },
   // Success and Error Functions..............................................................
   txError(error) {

@@ -120,6 +120,9 @@ export default {
 </script>
 
 <style scoped>
+.p-dropdown {
+  max-width: 50px;
+}
 .p-formgroup-inline {
   margin-top: 1rem;
 }

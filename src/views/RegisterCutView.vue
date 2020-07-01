@@ -35,9 +35,9 @@
           />
         </template>
       </Column>
-      <Column field="AssistPerecent" header="Ausenc.">
+      <Column field="AssistPerecent" header="Aus. %">
         <template #body="slotProps">
-          {{slotProps.data.AssistPercent +"%"}}
+          {{ slotProps.data.AssistPercent + "%" }}
         </template>
       </Column>
     </DataTable>
@@ -73,6 +73,9 @@ export default {
 </script>
 
 <style scoped>
+.p-dropdown {
+  max-width: 60px;
+}
 #form {
   margin: 0 auto;
   max-width: 300px;

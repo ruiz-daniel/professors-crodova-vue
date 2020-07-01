@@ -305,7 +305,7 @@ new Vue({
         APICalls.updatePeriodicEvaluationsToServer(evaluations);
       });
     },
-    getCodifiefs() {
+    getCodifiers() {
       Database.getTeacherData(function(data) {
         store.commit("SET_TEACHER_DATA", data);
       });
@@ -323,8 +323,9 @@ new Vue({
 
   mounted() {
     Database.initDatabase();
-    this.getCodifiefs();
+    this.getCodifiers();
     Database.setToastService(this.$toast);
+    router.push("/");
   },
   render: h => h(App)
 }).$mount("#app");
