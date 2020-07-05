@@ -274,8 +274,8 @@ new Vue({
     //............................................................................................
 
     getAllDataFromServer(loading) {
-      var allData = APICalls.getAllData();
-      this.populateDB(allData);
+      APICalls.getAllData(false, this.populateDB);
+      
     },
 
     updateToServer() {

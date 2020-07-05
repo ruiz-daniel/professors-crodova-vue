@@ -8,31 +8,34 @@ var headers = {};
 
 export default {
   createHeaders(username, password) {
-    AUTH_CREDENTIALS = username + password;
+    AUTH_CREDENTIALS = username + ":" + password;
     headers = {
       Authorization: `Basic ${btoa(AUTH_CREDENTIALS)}`,
       "Content-Type": "application/json"
     };
+    console.log(headers);
   },
   stateBaseURL(url) {
     baseURL = url;
   },
-  getBaseURL(){
+  getBaseURL() {
     return baseURL;
   },
-  getAllData(loading) {
+  getAllData(loading, fn) {
     var allData = {};
     loading = true;
     axios
       .request({
         method: "get",
         url: baseURL + "/sigenu-rest/teachers/getAllData",
+        data: {},
         headers: headers
+        //withCredentials: true
       })
       .then(response => {
         allData = response.data;
         loading = false;
-        return allData;
+        fn(allData);
       });
   },
 
