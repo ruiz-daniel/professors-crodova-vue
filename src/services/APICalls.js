@@ -40,11 +40,9 @@ export default {
 
   updateAssistToServer(assistsData, index, size) {
     if (index === size) {
-      console.log("finished");
       return "finished";
     } else {
       var element = assistsData[index];
-      console.log(element);
       axios
         .request({
           method: "get",
@@ -98,7 +96,6 @@ export default {
       return "finished";
     } else {
       var element = cutsData[index];
-      console.log(element);
       axios.request({
         method: "get",
         url: baseURL + "/sigenu-rest/teachers/registerEvaluativeCut",

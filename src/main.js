@@ -159,7 +159,6 @@ new Vue({
           elementCut.cuts.studentsCuts.length > 0
         ) {
           elementCut.cuts.studentsCuts.forEach(elementStudentCut => {
-            console.log(elementCut.Second_Delivered)
             cutsData.push({
               groupPlanningID: elementCut.ID,
               firstCourtHeader: elementCut.cuts.First_Court_HeaderID,
