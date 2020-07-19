@@ -3,6 +3,7 @@
     <div class="p-field">
       <h3>Registrar Asistencia</h3>
       <h4>{{ $store.state.subjectName }} Grupo {{ $store.state.groupName }}</h4>
+      <Calendar placeholder="Fecha" v-model="date" dateFormat="dd/mm/yy" />
       <Dropdown
         v-model="activity_type"
         :options="getActivityTypesNames()"
@@ -47,6 +48,7 @@ export default {
       assists: [],
       activity_type: "",
       week: {},
+      date: null,
       selectActivityDialog: false
     };
   },
@@ -90,6 +92,7 @@ export default {
       if (this.activity_type !== "" && this.week > 0) {
         this.assists.forEach(element => {
           element.Week = this.week;
+          element.Date = this.date;
           element.Activity_Type = this.$store.getters.getActivityTypeIDFromName(
             this.activity_type
           );
@@ -137,7 +140,7 @@ export default {
   margin-top: 1rem;
 }
 .p-dropdown {
-  margin-right: 0.5rem;
+  margin-left: 0.5rem;
 }
 .p-button {
   margin-right: 0.5rem;

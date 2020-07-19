@@ -62,6 +62,7 @@ export default {
   data() {
     return {
       evaluations: {},
+      evaluationsOld: [],
       evaluationValues: {}
     };
   },
@@ -70,39 +71,60 @@ export default {
       var toast = this.$toast;
       var evaluations = this.evaluations;
       this.evaluations.forEach((element, index) => {
-        this.$root.Database.updateEndEvaluations(
-          {
-            GroupPlanningID: element.GroupPlanningID,
-            StudentID: element.StudentID,
-            OrdinalEvaluationValueID: this.$store.getters.getEvaluationValueIDFromValue(
-              element.OrdinalEvaluationValueID
-            ),
-            RevEvaluationValueID: this.$store.getters.getEvaluationValueIDFromValue(
-              element.RevEvaluationValueID
-            ),
-            ExtraEvaluationValueID: this.$store.getters.getEvaluationValueIDFromValue(
-              element.ExtraEvaluationValueID
-            ),
-            FinalEvaluationID: this.$store.getters.getEvaluationValueIDFromValue(
-              element.FinalEvaluationID
-            ),
-            Updated: false
-          },
-          function() {
-            if (index === evaluations.length - 1) {
-              toast.add({
-                severity: "success",
-                summary: "Exito",
-                detail: "Se han actualizado las evaluaciones",
-                life: 3000
-              });
+        if (
+          element.OrdinalEvaluationValueID !==
+            this.evaluationsOld[index].OrdinalEvaluationValueID ||
+          element.RevEvaluationValueID !==
+            this.evaluationsOld[index].RevEvaluationValueID ||
+          element.ExtraEvaluationValueID !==
+            this.evaluationsOld[index].ExtraEvaluationValueID ||
+          element.FinalEvaluationID !==
+            this.evaluationsOld[index].FinalEvaluationID
+        )
+          this.$root.Database.updateEndEvaluations(
+            {
+              GroupPlanningID: element.GroupPlanningID,
+              StudentID: element.StudentID,
+              OrdinalEvaluationValueID: this.$store.getters.getEvaluationValueIDFromValue(
+                element.OrdinalEvaluationValueID
+              ),
+              RevEvaluationValueID: this.$store.getters.getEvaluationValueIDFromValue(
+                element.RevEvaluationValueID
+              ),
+              ExtraEvaluationValueID: this.$store.getters.getEvaluationValueIDFromValue(
+                element.ExtraEvaluationValueID
+              ),
+              FinalEvaluationID: this.$store.getters.getEvaluationValueIDFromValue(
+                element.FinalEvaluationID
+              ),
+              Updated: false
+            },
+            function() {
+              if (index === evaluations.length - 1) {
+                toast.add({
+                  severity: "success",
+                  summary: "Exito",
+                  detail: "Se han actualizado las evaluaciones",
+                  life: 3000
+                });
+              }
             }
-          }
-        );
+          );
       });
     },
     getEvaluations() {
       this.evaluations = this.$store.state.info;
+      this.evaluations.forEach(element => {
+        this.evaluationsOld.push({
+          GroupPlanningID: element.GroupPlanningID,
+          StudentID: element.StudentID,
+          StudentName: element.StudentName,
+          OrdinalEvaluationValueID: element.OrdinalEvaluationValueID,
+          RevEvaluationValueID: element.RevEvaluationValueID,
+          ExtraEvaluationValueID: element.ExtraEvaluationValueID,
+          FinalEvaluationID: element.FinalEvaluationID
+        });
+      });
     },
     getEvaluationValues() {
       var values = [];

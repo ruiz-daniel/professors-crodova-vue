@@ -53,6 +53,9 @@
         "
       />
     </div>
+    <div class="p-field" v-if="studentSelected">
+      <Calendar placeholder="Fecha" v-model="date" dateFormat="dd/mm/yy" />
+    </div>
     <DataTable :value="this.$store.state.info" v-if="studentSelected">
       <Column field="type" header="Actividad">
         <template #body="slotProps">
@@ -91,6 +94,7 @@ export default {
       studentSelected: false,
       evaluation_type: {},
       week: {},
+      date: null,
       evaluation: {}
     };
   },
@@ -117,7 +121,12 @@ export default {
         EvaluationTypeCode: this.evaluation_type.Code,
         EvaluationType: this.evaluation_type.ID,
         EvaluationValue: this.evaluation,
-        Date: new Date(),
+        Date:
+          this.date.getDate() +
+          "-" +
+          (this.date.getMonth() + 1) +
+          "-" +
+          this.date.getFullYear(),
         Week: this.week,
         Deleted: false,
         Updated: false
@@ -126,16 +135,21 @@ export default {
     registerEvaluation() {
       var toast = this.$toast;
       if (
-        Object.keys(this.evaluation_type).length > 0 &&
-        Object.keys(this.week).length > 0 &&
-        Object.keys(this.evaluation).length > 0
+        this.evaluation_type != {} &&
+        this.week > 0 &&
+        this.evaluation.length != {}
       ) {
         this.$root.Database.insertPeriodicEvaluations([
           {
             Periodic_Evaluation_Type: this.evaluation_type.ID,
             Cancelled: false,
             Evaluation_Value: this.evaluation,
-            Date: new Date(),
+            Date:
+          this.date.getDate() +
+          "-" +
+          (this.date.getMonth() + 1) +
+          "-" +
+          this.date.getFullYear(),
             Subject: this.$store.state.subjectID,
             Grupo: this.$store.state.groupID,
             Week: this.week,

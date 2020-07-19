@@ -31,6 +31,7 @@ import Dialog from "primevue/dialog";
 import Toast from "primevue/toast";
 import OverlayPanel from "primevue/overlaypanel";
 import InputText from "primevue/inputtext";
+import Calendar from "primevue/calendar";
 import APICalls from "./services/APICalls";
 Vue.component("Sidebar", Sidebar);
 Vue.component("PanelMenu", PanelMenu);
@@ -48,6 +49,7 @@ Vue.component("Row", Row);
 Vue.component("Toast", Toast);
 Vue.component("OverlayPanel", OverlayPanel);
 Vue.component("InputText", InputText);
+Vue.component("Calendar", Calendar);
 
 Vue.prototype.$http = axios;
 //Vue.use(Vuex);
@@ -157,12 +159,13 @@ new Vue({
           elementCut.cuts.studentsCuts.length > 0
         ) {
           elementCut.cuts.studentsCuts.forEach(elementStudentCut => {
+            console.log(elementCut.Second_Delivered)
             cutsData.push({
               groupPlanningID: elementCut.ID,
-              firstCourtHeader: elementCut.First_Court_HeaderID,
-              secondCourtHeader: elementCut.Second_Court_HeaderID,
-              firstDelivered: elementCut.First_Delivered,
-              secondDelivered: elementCut.Second_Delivered,
+              firstCourtHeader: elementCut.cuts.First_Court_HeaderID,
+              secondCourtHeader: elementCut.cuts.Second_Court_HeaderID,
+              firstDelivered: elementCut.cuts.First_Delivered,
+              secondDelivered: elementCut.cuts.Second_Delivered,
               Abscense_Hours_Court1: elementStudentCut.Abscense_Hours_Court1,
               Abscense_Hours_Court2: elementStudentCut.Abscense_Hours_Court2,
               Assistance_Percent: elementStudentCut.Assistance_Percent,
@@ -275,7 +278,6 @@ new Vue({
 
     getAllDataFromServer(loading) {
       APICalls.getAllData(false, this.populateDB);
-      
     },
 
     updateToServer() {
@@ -287,7 +289,7 @@ new Vue({
 
     updateAssistToServer() {
       Database.getAssistsForUpdate(function(assists) {
-        APICalls.updateAssistToServer(assists);
+        APICalls.updateAssistToServer(assists, 0, assists.length);
       });
     },
     updateEndEvaluationsToServer() {
@@ -297,7 +299,7 @@ new Vue({
     },
     updateEvaluativeCutsToServer() {
       Database.getEvaluativeCutsForUpdate(function(cuts) {
-        APICalls.updateEvaluativeCutsToServer(cuts);
+        APICalls.updateEvaluativeCutsToServer(cuts, 0, cuts.length);
       });
     },
     updatePeriodicEvaluationsToServer() {

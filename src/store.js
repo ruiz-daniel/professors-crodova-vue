@@ -42,14 +42,14 @@ export default new Vuex.Store({
       return result;
     },
     getEvaluationValueFromID: state => id => {
-      var result = {};
+      var result = "undefined";
       state.evaluationValues.forEach(element => {
         if (element.ID === id) result = element.Value;
       });
       return result;
     },
     getEvaluationValueIDFromValue: state => value => {
-      var result = {};
+      var result = "undefined";
       state.evaluationValues.forEach(element => {
         if (element.Value === value) result = element.ID;
       });

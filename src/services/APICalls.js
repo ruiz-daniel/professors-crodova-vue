@@ -28,9 +28,8 @@ export default {
       .request({
         method: "get",
         url: baseURL + "/sigenu-rest/teachers/getAllData",
-        data: {},
-        headers: headers
-        //withCredentials: true
+        //headers: headers
+        withCredentials: true
       })
       .then(response => {
         allData = response.data;
@@ -39,27 +38,37 @@ export default {
       });
   },
 
-  updateAssistToServer(assistsData) {
-    assistsData.forEach(element => {
-      axios.request({
-        method: "get",
-        url: baseURL + "/sigenu-rest/teachers/updateAssists",
-        params: {
-          Date: element.Date,
-          Week: element.Week,
-          Activity_Type: element.Activity_Type,
-          Student: element.Student,
-          Group: element.Group,
-          Teacher: element.Teacher,
-          Teacher_Name: element.Teacher_Name,
-          Subject: element.Subject,
-          First_Turn: element.First_Turn,
-          Second_Turn: element.Second_Turn,
-          Modified: element.Modified
-        },
-        headers: headers
-      });
-    });
+  updateAssistToServer(assistsData, index, size) {
+    if (index === size) {
+      console.log("finished");
+      return "finished";
+    } else {
+      var element = assistsData[index];
+      console.log(element);
+      axios
+        .request({
+          method: "get",
+          url: baseURL + "/sigenu-rest/teachers/updateAssists",
+          params: {
+            Date: element.Date,
+            Week: element.Week,
+            Activity_Type: element.Activity_Type,
+            Student: element.Student,
+            Group: element.Group,
+            Teacher: element.Teacher,
+            Teacher_Name: element.Teacher_Name,
+            Subject: element.Subject,
+            First_Turn: element.First_Turn,
+            Second_Turn: element.Second_Turn,
+            Modified: element.Modified
+          },
+          //headers: headers
+          withCredentials: true
+        })
+        .then(response => {
+          this.updateAssistToServer(assistsData, index + 1, size);
+        });
+    }
   },
   updateEndEvaluationsToServer(evaluationsData) {
     evaluationsData.forEach(element => {
@@ -78,17 +87,23 @@ export default {
           Teacher_Name: element.Teacher_Name,
           Update: element.Update
         },
-        headers: headers
+        //headers: headers
+        withCredentials: true
       });
     });
   },
-  updateEvaluativeCutsToServer(cutsData) {
-    cutsData.forEach(element => {
+  updateEvaluativeCutsToServer(cutsData, index, size) {
+    if (index === size) {
+      console.log("finished");
+      return "finished";
+    } else {
+      var element = cutsData[index];
+      console.log(element);
       axios.request({
         method: "get",
         url: baseURL + "/sigenu-rest/teachers/registerEvaluativeCut",
         params: {
-          GroupPlanning: element.GroupPlanning,
+          GroupPlanning: element.GroupPlanningID,
           Teacher_Name: element.Teacher_name,
           Cut: element.Cut,
           Student_ID: element.Student_ID,
@@ -98,9 +113,12 @@ export default {
           FirstHeader: element.FirstHeader,
           SecondHeader: element.SecondHeader
         },
-        headers: headers
-      });
-    });
+        //headers: headers
+        withCredentials: true
+      }).then(response => {
+        this.updateEvaluativeCutsToServer(cutsData, index + 1, size);
+      });;
+    }
   },
   updatePeriodicEvaluationsToServer(evaluationsdata) {
     evaluationsdata.forEach(element => {
@@ -110,7 +128,7 @@ export default {
         params: {
           Student_ID: element.Student_ID,
           Evaluation_Value: element.Evaluation_Value,
-          Periodic_Evaluation_Type_ID: element.Periodic_Evaluation_Type,
+          Type: element.Type,
           Date: element.Date,
           Subject_ID: element.Subject_ID,
           Group_ID: element.Group_ID,
@@ -118,7 +136,8 @@ export default {
           Teacher_ID: element.Teacher_ID,
           Teacher_Name: element.Teacher_Name
         },
-        headers: headers
+        //headers: headers
+        withCredentials: true
       });
     });
   }

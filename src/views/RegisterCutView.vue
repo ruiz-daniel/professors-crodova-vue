@@ -30,6 +30,7 @@
         <template #body="slotProps">
           <Dropdown
             v-model="slotProps.data.CualitativeEvaluation2"
+            v-if="slotProps.data.FirstDelivered === true"
             :options="evaluationsOptions"
             placeholder="NE"
           />
@@ -51,6 +52,7 @@ export default {
       selectedStudent: {},
       cutsOptions: ["01", "02"],
       cuts: {},
+      cutsOld: [],
       selectedCut: {},
       evaluationsOptions: ["B", "R", "M", "NE"],
       evaluation: {}
@@ -59,10 +61,30 @@ export default {
   methods: {
     getCuts() {
       this.cuts = this.$store.state.info;
+      this.cuts.forEach(element => {
+        this.cutsOld.push({
+          GroupPlanningID: element.GroupPlanningID,
+          FirstDelivered: element.FirstDelivered,
+          SecondDelivered: element.SecondDelivered,
+          CualitativeEvaluation1: element.CualitativeEvaluation1,
+          CualitativeEvaluation2: element.CualitativeEvaluation2,
+          StudentID: element.StudentID,
+          StudentName: element.StudentName,
+          AbsenceHoursCut1: element.AbsenceHoursCut1,
+          AbsenceHoursCut2: element.AbsenceHoursCut2,
+          AssistPercent: element.AssistPercent
+        });
+      });
     },
     registerCut() {
-      this.cuts.forEach(element => {
-        this.$root.Database.updateEvaluativeCut(element);
+      this.cuts.forEach((element, index) => {
+        if (
+          element.CualitativeEvaluation1 !==
+            this.cutsOld[index].CualitativeEvaluation1 ||
+          element.CualitativeEvaluation2 !==
+            this.cutsOld[index].CualitativeEvaluation2
+        )
+          this.$root.Database.updateEvaluativeCut(element);
       });
     }
   },

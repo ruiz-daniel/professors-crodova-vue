@@ -62,7 +62,7 @@ const queryUpdateEndEvaluations =
 
 const queryUpdateEvaluativeCuts =
   "UPDATE student_cut SET " +
-  "student_cut_cualitative_evaluation1 = ?, student_cut_cualitative_evaluation2 = ? " +
+  "student_cut_cualitative_evaluation1 = ?, student_cut_cualitative_evaluation2 = ?, student_cut_updated = 'false' " +
   "WHERE student_cut_evaluative_cut_fk = ? AND student_cut_student_fk = ?";
 
 const queryUpdateAssist =
@@ -858,7 +858,7 @@ export default {
       tx.executeSql(queryAssistForUpdate, [], function(tx, results) {
         for (let i = 0; i < results.rows.length; i++) {
           assists.push({
-            Date: results.rows.item(i).assist_date,
+            Date: new Date(results.rows.item(i).assist_date).getTime(),
             Week: results.rows.item(i).assist_week,
             Activity_Type: results.rows.item(i).assist_activity_type_fk,
             Student: results.rows.item(i).assist_student_fk,
@@ -883,7 +883,10 @@ export default {
         for (let i = 0; i < results.rows.length; i++) {
           if (
             results.rows.item(i).student_cut_cualitative_evaluation1 !==
-            "undefined"
+              "undefined" &&
+            results.rows.item(i).student_cut_cualitative_evaluation1 !== ""
+            &&
+            results.rows.item(i).student_cut_cualitative_evaluation1 !== "NE"
           ) {
             cuts.push({
               GroupPlanningID: results.rows.item(i).cut_group_planning_id,
@@ -898,7 +901,10 @@ export default {
           }
           if (
             results.rows.item(i).student_cut_cualitative_evaluation2 !==
-            "undefined"
+              "undefined" &&
+            results.rows.item(i).student_cut_cualitative_evaluation2 !== ""
+            &&
+            results.rows.item(i).student_cut_cualitative_evaluation2 !== "NE"
           ) {
             cuts.push({
               GroupPlanningID: results.rows.item(i).cut_group_planning_id,
@@ -927,9 +933,10 @@ export default {
           evaluations.push({
             Student_ID: results.rows.item(i).periodic_evaluation_student_fk,
             Evaluation_Value: results.rows.item(i).periodic_evaluation_value,
-            Periodic_Evaluation_Type_ID: results.rows.item(i)
-              .periodic_evaluation_type_fk,
-            Date: results.rows.item(i).periodic_evaluation_date,
+            Type: results.rows.item(i).periodic_evaluation_type_fk.toString(),
+            Date: new Date(
+              results.rows.item(i).periodic_evaluation_date
+            ).getTime(),
             Subject_ID: results.rows.item(i).periodic_evaluation_subject_fk,
             Group_ID: results.rows.item(i).periodic_evaluation_group_fk,
             Week: results.rows.item(i).periodic_evaluation_week,
@@ -947,12 +954,13 @@ export default {
     database.transaction(function(tx) {
       tx.executeSql(queryEndEvaluationsForUpdate, [], function(tx, results) {
         for (let i = 0; i < results.rows.length; i++) {
+          var evaluation = {};
           if (
             results.rows.item(i).ordinal_exam_evaluation_value_id !==
               "undefined" &&
             results.rows.item(i).examination_acta_ordinal_id !== "undefined"
           ) {
-            evaluations.push({
+            evaluation = {
               Group_ID: results.rows.item(i).end_evaluation_group_fk,
               Subject_ID: results.rows.item(i).end_evaluation_subject_fk,
               ID_Acta: results.rows.item(i).examination_acta_ordinal_id,
@@ -966,13 +974,13 @@ export default {
                 .matriculated_subject_id,
               Teacher_Name: results.rows.item(i).teacher_name,
               Update: true
-            });
+            };
           } else if (
             results.rows.item(i).ordinal_exam_evaluation_value_id !==
               "undefined" &&
             results.rows.item(i).examination_acta_ordinal_id === "undefined"
           ) {
-            evaluations.push({
+            evaluation = {
               Group_ID: results.rows.item(i).end_evaluation_group_fk,
               Subject_ID: results.rows.item(i).end_evaluation_subject_fk,
               Convocatoria: "01",
@@ -984,13 +992,13 @@ export default {
                 .matriculated_subject_id,
               Teacher_Name: results.rows.item(i).teacher_name,
               Update: false
-            });
+            };
           }
           if (
             results.rows.item(i).rev_exam_evaluation_value_id !== "undefined" &&
             results.rows.item(i).examination_acta_reval_id !== "undefined"
           ) {
-            evaluations.push({
+            evaluation = {
               Group_ID: results.rows.item(i).end_evaluation_group_fk,
               Subject_ID: results.rows.item(i).end_evaluation_subject_fk,
               ID_Acta: results.rows.item(i).examination_acta_reval_id,
@@ -1004,12 +1012,12 @@ export default {
                 .matriculated_subject_id,
               Teacher_Name: results.rows.item(i).teacher_name,
               Update: true
-            });
+            };
           } else if (
             results.rows.item(i).rev_exam_evaluation_value_id !== "undefined" &&
             results.rows.item(i).examination_acta_reval_id === "undefined"
           ) {
-            evaluations.push({
+            evaluation = {
               Group_ID: results.rows.item(i).end_evaluation_group_fk,
               Subject_ID: results.rows.item(i).end_evaluation_subject_fk,
               Convocatoria: "02",
@@ -1021,14 +1029,14 @@ export default {
                 .matriculated_subject_id,
               Teacher_Name: results.rows.item(i).teacher_name,
               Update: false
-            });
+            };
           }
           if (
             results.rows.item(i).extra_exam_evaluation_value_id !==
               "undefined" &&
             results.rows.item(i).examination_acta_extra_id !== "undefined"
           ) {
-            evaluations.push({
+            evaluation = {
               Group_ID: results.rows.item(i).end_evaluation_group_fk,
               Subject_ID: results.rows.item(i).end_evaluation_subject_fk,
               ID_Acta: results.rows.item(i).examination_acta_extra_id,
@@ -1042,13 +1050,13 @@ export default {
                 .matriculated_subject_id,
               Teacher_Name: results.rows.item(i).teacher_name,
               Update: true
-            });
+            };
           } else if (
             results.rows.item(i).extra_exam_evaluation_value_id !==
               "undefined" &&
             results.rows.item(i).examination_acta_extra_id === "undefined"
           ) {
-            evaluations.push({
+            evaluation = {
               Group_ID: results.rows.item(i).end_evaluation_group_fk,
               Subject_ID: results.rows.item(i).end_evaluation_subject_fk,
               Convocatoria: "03",
@@ -1060,9 +1068,11 @@ export default {
                 .matriculated_subject_id,
               Teacher_Name: results.rows.item(i).teacher_name,
               Update: false
-            });
+            };
           }
+          evaluations.push(evaluation);
         }
+        console.log(evaluations);
         fn(evaluations);
       });
     });
