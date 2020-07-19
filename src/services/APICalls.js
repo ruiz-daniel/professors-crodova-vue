@@ -7,13 +7,22 @@ var AUTH_CREDENTIALS = {};
 var headers = {};
 
 export default {
+  install() {
+    axios.interceptors.request.use(request => {
+      const hasAuthHeader = request.headers.Authorization;
+      console.log(request.headers.Authorization);
+      if (!hasAuthHeader) {
+        this.setAuthHeader(request);
+      }
+      return request;
+    });
+  },
+  setAuthHeader(request) {
+    request.headers.common.Authorization = `Basic ${btoa(AUTH_CREDENTIALS)}`;
+    request.headers.common["Content-Type"] = "application/json";
+  },
   createHeaders(username, password) {
-    AUTH_CREDENTIALS = username + ":" + password;
-    headers = {
-      Authorization: `Basic ${btoa(AUTH_CREDENTIALS)}`,
-      "Content-Type": "application/json"
-    };
-    console.log(headers);
+    AUTH_CREDENTIALS = `${username}:${password}`;
   },
   stateBaseURL(url) {
     baseURL = url;
@@ -24,18 +33,11 @@ export default {
   getAllData(loading, fn) {
     var allData = {};
     loading = true;
-    axios
-      .request({
-        method: "get",
-        url: baseURL + "/sigenu-rest/teachers/getAllData",
-        //headers: headers
-        withCredentials: true
-      })
-      .then(response => {
-        allData = response.data;
-        loading = false;
-        fn(allData);
-      });
+    axios.get(baseURL + "/sigenu-rest/teachers/getAllData").then(response => {
+      allData = response.data;
+      loading = false;
+      fn(allData);
+    });
   },
 
   updateAssistToServer(assistsData, index, size) {
@@ -99,25 +101,27 @@ export default {
     } else {
       var element = cutsData[index];
       console.log(element);
-      axios.request({
-        method: "get",
-        url: baseURL + "/sigenu-rest/teachers/registerEvaluativeCut",
-        params: {
-          GroupPlanning: element.GroupPlanningID,
-          Teacher_Name: element.Teacher_name,
-          Cut: element.Cut,
-          Student_ID: element.Student_ID,
-          Student_Name: element.Student_Name,
-          AssistPercent: element.AssistPercent,
-          Evaluation: element.Evaluation,
-          FirstHeader: element.FirstHeader,
-          SecondHeader: element.SecondHeader
-        },
-        //headers: headers
-        withCredentials: true
-      }).then(response => {
-        this.updateEvaluativeCutsToServer(cutsData, index + 1, size);
-      });;
+      axios
+        .request({
+          method: "get",
+          url: baseURL + "/sigenu-rest/teachers/registerEvaluativeCut",
+          params: {
+            GroupPlanning: element.GroupPlanningID,
+            Teacher_Name: element.Teacher_name,
+            Cut: element.Cut,
+            Student_ID: element.Student_ID,
+            Student_Name: element.Student_Name,
+            AssistPercent: element.AssistPercent,
+            Evaluation: element.Evaluation,
+            FirstHeader: element.FirstHeader,
+            SecondHeader: element.SecondHeader
+          },
+          //headers: headers
+          withCredentials: true
+        })
+        .then(response => {
+          this.updateEvaluativeCutsToServer(cutsData, index + 1, size);
+        });
     }
   },
   updatePeriodicEvaluationsToServer(evaluationsdata) {

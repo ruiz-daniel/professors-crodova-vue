@@ -52,7 +52,7 @@ Vue.component("InputText", InputText);
 Vue.component("Calendar", Calendar);
 
 Vue.prototype.$http = axios;
-//Vue.use(Vuex);
+Vue.use(APICalls);
 
 Vue.config.productionTip = false;
 
@@ -159,7 +159,7 @@ new Vue({
           elementCut.cuts.studentsCuts.length > 0
         ) {
           elementCut.cuts.studentsCuts.forEach(elementStudentCut => {
-            console.log(elementCut.Second_Delivered)
+            console.log(elementCut.Second_Delivered);
             cutsData.push({
               groupPlanningID: elementCut.ID,
               firstCourtHeader: elementCut.cuts.First_Court_HeaderID,
