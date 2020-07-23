@@ -33,6 +33,8 @@ import OverlayPanel from "primevue/overlaypanel";
 import InputText from "primevue/inputtext";
 import Calendar from "primevue/calendar";
 import APICalls from "./services/APICalls";
+import Message from "primevue/message";
+import ProgressBar from "primevue/progressbar";
 Vue.component("Sidebar", Sidebar);
 Vue.component("PanelMenu", PanelMenu);
 Vue.component("Card", Card);
@@ -50,6 +52,8 @@ Vue.component("Toast", Toast);
 Vue.component("OverlayPanel", OverlayPanel);
 Vue.component("InputText", InputText);
 Vue.component("Calendar", Calendar);
+Vue.component("Message", Message);
+Vue.component("ProgressBar", ProgressBar);
 
 Vue.prototype.$http = axios;
 Vue.use(APICalls);
@@ -66,7 +70,13 @@ new Vue({
     fileData,
     sideMenuVisible: false,
     sideInfoVisible: false,
-    loading: false
+    loadingRequest: false,
+    controlData: { inserted: 0 }
+  },
+  computed: {
+    loading() {
+      return this.controlData.inserted > 0 && this.controlData.inserted < 10;
+    }
   },
   methods: {
     saveResponseToLocalFile(filename, jsonData) {
@@ -97,28 +107,39 @@ new Vue({
     },
     //Populate Database Functions................................................................
     populateDB(data) {
-      Database.insertTeacherData(data.teacher_data);
-      Database.insertGroups(data.teacher_data.Grupos);
-      Database.insertGroupPlannings(data.teacher_data.Grupos);
-      this.populateDBStudents(data);
-      Database.insertSubjects(data.teacher_data.Subjects);
-      this.populateDBAssists(data);
-      this.populateDBEndEvaluations(data);
-      this.populateDBPeriodicEvaluations(data);
-      this.populateDBEvaluativeCuts(data);
-      this.populateDBCodifiers(data);
+      var control = this.controlData;
+      control.inserted = 0;
+      Database.resetDatabase();
+      Database.insertTeacherData(data.teacher_data, function() {
+        control.inserted++;
+      });
+      Database.insertGroups(data.teacher_data.Grupos, function() {
+        control.inserted++;
+      });
+      Database.insertGroupPlannings(data.teacher_data.Grupos, function() {
+        control.inserted++;
+      });
+      this.populateDBStudents(data, control);
+      Database.insertSubjects(data.teacher_data.Subjects, function() {
+        control.inserted++;
+      });
+      this.populateDBAssists(data, control);
+      this.populateDBEndEvaluations(data, control);
+      this.populateDBPeriodicEvaluations(data, control);
+      this.populateDBEvaluativeCuts(data, control);
+      this.populateDBCodifiers(data, control);
     },
-    populateDBCodifiers(data) {
-      Database.insertActivityTypes(data.codifiers.Activity_Type);
-      Database.insertEvaluationValues(data.codifiers.Evaluation_Values);
-      Database.insertPeriodicEvaluationTypes(
-        data.codifiers.Periodic_Evaluation_Type
-      );
-      Database.insertCualitativeEvaluations(
-        data.codifiers.Cualitative_Evaluation
+    populateDBCodifiers(data, control) {
+      Database.insertCodifiers(
+        data.codifiers.Activity_Type,
+        data.codifiers.Evaluation_Values,
+        data.codifiers.Periodic_Evaluation_Type,
+        data.codifiers.Cualitative_Evaluation,
+        control,
+        this.getCodifiers
       );
     },
-    populateDBStudents(data) {
+    populateDBStudents(data, control) {
       var studentData = [];
       data.teacher_data.Grupos.forEach(element => {
         element.Students.forEach(studentElement => {
@@ -128,9 +149,11 @@ new Vue({
           });
         });
       });
-      Database.insertStudents(studentData);
+      Database.insertStudents(studentData, function() {
+        control.inserted += 1;
+      });
     },
-    populateDBAssists(data) {
+    populateDBAssists(data, control) {
       var verifiedGroups = [];
       var assistsData = [];
       data.teacher_data.Grupos.forEach(elementGroup => {
@@ -142,7 +165,9 @@ new Vue({
           });
         verifiedGroups.push(elementGroup.ID_SIGENU);
       });
-      Database.insertAssists(assistsData, "", "");
+      Database.insertAssists(assistsData, "", "", function() {
+        control.inserted++;
+      });
     },
     verifyExistingGroup(array, group) {
       var exist = false;
@@ -151,7 +176,7 @@ new Vue({
       });
       return exist;
     },
-    populateDBEvaluativeCuts(data) {
+    populateDBEvaluativeCuts(data, control) {
       var cutsData = [];
       data.evaluative_cuts.forEach(elementCut => {
         if (
@@ -159,7 +184,6 @@ new Vue({
           elementCut.cuts.studentsCuts.length > 0
         ) {
           elementCut.cuts.studentsCuts.forEach(elementStudentCut => {
-            console.log(elementCut.Second_Delivered);
             cutsData.push({
               groupPlanningID: elementCut.ID,
               firstCourtHeader: elementCut.cuts.First_Court_HeaderID,
@@ -193,7 +217,9 @@ new Vue({
           });
         }
       });
-      Database.insertEvaluativeCuts(cutsData);
+      Database.insertEvaluativeCuts(cutsData, function() {
+        control.inserted += 1;
+      });
     },
     getStudentIdFromName(data, name) {
       var id = {};
@@ -216,7 +242,7 @@ new Vue({
       });
       return students;
     },
-    populateDBEndEvaluations(data) {
+    populateDBEndEvaluations(data, control) {
       var evaluationsData = [];
       data.end_evaluations.forEach(elementEvaluation => {
         elementEvaluation.evaluations.forEach(element => {
@@ -246,9 +272,11 @@ new Vue({
           });
         });
       });
-      Database.insertEndEvaluations(evaluationsData);
+      Database.insertEndEvaluations(evaluationsData, function() {
+        control.inserted += 1;
+      });
     },
-    populateDBPeriodicEvaluations(data) {
+    populateDBPeriodicEvaluations(data, control) {
       var evaluationsData = [];
       data.teacher_data.Grupos.forEach(elementGroup => {
         elementGroup.Students.forEach(studentElement => {
@@ -272,12 +300,14 @@ new Vue({
           });
         });
       });
-      Database.insertPeriodicEvaluations(evaluationsData);
+      Database.insertPeriodicEvaluations(evaluationsData, function() {
+        control.inserted += 1;
+      });
     },
     //............................................................................................
 
-    getAllDataFromServer(loading) {
-      APICalls.getAllData(false, this.populateDB);
+    getAllDataFromServer() {
+      APICalls.getAllData(this.loadingRequest, this.populateDB);
     },
 
     updateToServer() {

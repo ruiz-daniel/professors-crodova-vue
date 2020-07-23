@@ -121,11 +121,6 @@ export default {
   },
   createdTablesSuccess() {
     console.log("Created tables OK");
-    toastService.add({
-      severity: "success",
-      detail: "Tablas Creadas",
-      life: 3000
-    });
   },
   txSuccess(msg) {
     toastService.add({
@@ -170,11 +165,7 @@ export default {
         });
       },
       function() {
-        toastService.add({
-          severity: "success",
-          detail: "Base de datos reiniciada",
-          life: 3000
-        });
+        console.log("Base de datos reiniciada");
       }
     );
     this.createTables();
@@ -234,20 +225,25 @@ export default {
         "periodic_evaluation_type_code, periodic_evaluation_type_priority, periodic_evaluation_type_canceled)"
     );
   },
-  insertTeacherData(data) {
+  insertTeacherData(data, fn) {
     database.transaction(
       function(tx) {
         tx.executeSql(
           "INSERT INTO teacher_data (teacher_id, teacher_name) VALUES (?, ?)",
-          [data.ID_SIGENU, data.Name]
+          [data.ID_SIGENU, data.Name],
+          function() {
+            fn();
+          }
         );
       },
       this.txError,
-      this.txSuccess("Insertados datos del profesor")
+      function(){
+        console.log("Insertados los datos del profesor");
+      }
     );
   },
 
-  insertGroups(groupsData) {
+  insertGroups(groupsData, fn) {
     var count = 0;
     groupsData.forEach(element => {
       database.transaction(
@@ -261,18 +257,14 @@ export default {
         this.txError,
         function() {
           if (count === groupsData.length) {
-            toastService.add({
-              severity: "success",
-              detail: "Insertados los grupos",
-              life: 3000
-            });
             console.log("Insertados los grupos");
+            fn();
           }
         }
       );
     });
   },
-  insertStudents(studentsData) {
+  insertStudents(studentsData, fn) {
     var count = 0;
     studentsData.forEach(element => {
       database.transaction(
@@ -292,32 +284,34 @@ export default {
         this.txError,
         function() {
           if (count === studentsData.length) {
-            toastService.add({
-              severity: "success",
-              detail: "Insertados los estudiantes",
-              life: 3000
-            });
             console.log("Insertados los estudiantes");
+            fn();
           }
         }
       );
     });
   },
-  insertGroupPlannings(planningData) {
+  insertGroupPlannings(planningData, fn) {
     database.transaction(
       function(tx) {
-        planningData.forEach(element => {
+        planningData.forEach((element, index) => {
           tx.executeSql(
             "INSERT INTO group_planning (group_planning_id, group_fk, subject_fk) VALUES (?, ?, ?) ",
             [element.GrupoPlanningID, element.ID_SIGENU, element.SubjectID]
           );
+          if (index === planningData.lenght - 1) {
+            fn();
+          }
         });
       },
       this.txError,
-      this.txSuccess("Insertadas las planificaciones")
+      function() {
+        console.log("Insertadas las planificaciones");
+        fn();
+      }
     );
   },
-  insertSubjects(subjectsData) {
+  insertSubjects(subjectsData, fn) {
     database.transaction(
       function(tx) {
         subjectsData.forEach(element => {
@@ -328,10 +322,13 @@ export default {
         });
       },
       this.txError,
-      this.txSuccess("Insertadas las asignaturas")
+      function() {
+        console.log("Insertadas la asignaturas");
+        fn();
+      }
     );
   },
-  insertAssists(assistsData, groupPlanningID, subjectHours) {
+  insertAssists(assistsData, groupPlanningID, subjectHours, fn) {
     this.getEvaluativeCutsFromGroup(groupPlanningID, function(cuts) {
       database.transaction(
         function(tx) {
@@ -398,80 +395,107 @@ export default {
           });
         },
         function() {
-          toastService.add({
-            severity: "success",
-            detail: "Se han guardado las asistencias",
-            life: 3000
-          });
+          if (groupPlanningID !== "" && subjectHours !== "") {
+            toastService.add({
+              severity: "success",
+              detail: "Se han guardado las asistencias",
+              life: 3000
+            });
+          }
+          console.log("Se han guardado las asistencias");
+          fn();
         }
       );
     });
   },
-  insertEndEvaluations(evaluationsData) {
-    evaluationsData.forEach(element => {
-      database.transaction(function(tx) {
-        tx.executeSql(
-          "INSERT INTO end_evaluation (end_evaluation_group_planning_id, examination_acta_ordinal_id, examination_acta_reval_id, examination_acta_extra_id," +
-            "end_evaluation_student_id, end_evaluation_student_name, end_evaluation_list_number, end_evaluation_subject_fk, end_evaluation_group_fk," +
-            "matriculated_subject_id, matriculated_subject_situation_id, ordinal_exam_evaluation_value_id," +
-            "rev_exam_evaluation_value_id, extra_exam_evaluation_value_id," +
-            "final_evaluation_id, ordinal_evaluation_id, rev_evaluation_id, extra_evaluation_id, end_evaluation_updated) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ",
-          [
-            element.groupPlanningID,
-            element.ID_Acta1,
-            element.ID_Acta2,
-            element.ID_Acta3,
-            element.Student_ID,
-            element.Student_Name,
-            element.List_Number,
-            element.Subject_ID,
-            element.Group_ID,
-            element.Matriculated_Subject_ID,
-            element.Matriculated_Subject_Situation_ID,
-            element.Ordinal_Exam_Evaluation_Value_ID,
-            element.Rev_Exam_Evaluation_Value_ID,
-            element.Extra_Exam_Evaluation_Value_ID,
-            element.Final_Evaluation_Value_ID,
-            element.Ordinal_Evaluation_ID,
-            element.Rev_Evaluation_ID,
-            element.Extra_Evaluation_ID,
-            element.Updated
-          ]
-        );
-      });
+  insertEndEvaluations(evaluationsData, fn) {
+    var count = 0;
+    evaluationsData.forEach((element, index) => {
+      database.transaction(
+        function(tx) {
+          tx.executeSql(
+            "INSERT INTO end_evaluation (end_evaluation_group_planning_id, examination_acta_ordinal_id, examination_acta_reval_id, examination_acta_extra_id," +
+              "end_evaluation_student_id, end_evaluation_student_name, end_evaluation_list_number, end_evaluation_subject_fk, end_evaluation_group_fk," +
+              "matriculated_subject_id, matriculated_subject_situation_id, ordinal_exam_evaluation_value_id," +
+              "rev_exam_evaluation_value_id, extra_exam_evaluation_value_id," +
+              "final_evaluation_id, ordinal_evaluation_id, rev_evaluation_id, extra_evaluation_id, end_evaluation_updated) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ",
+            [
+              element.groupPlanningID,
+              element.ID_Acta1,
+              element.ID_Acta2,
+              element.ID_Acta3,
+              element.Student_ID,
+              element.Student_Name,
+              element.List_Number,
+              element.Subject_ID,
+              element.Group_ID,
+              element.Matriculated_Subject_ID,
+              element.Matriculated_Subject_Situation_ID,
+              element.Ordinal_Exam_Evaluation_Value_ID,
+              element.Rev_Exam_Evaluation_Value_ID,
+              element.Extra_Exam_Evaluation_Value_ID,
+              element.Final_Evaluation_Value_ID,
+              element.Ordinal_Evaluation_ID,
+              element.Rev_Evaluation_ID,
+              element.Extra_Evaluation_ID,
+              element.Updated
+            ]
+          );
+          count++;
+        },
+        this.txError,
+        function() {
+          if (count === evaluationsData.length) {
+            console.log("Insertadas las evaluaciones finales");
+            fn();
+          }
+        }
+      );
     });
   },
 
-  insertPeriodicEvaluations(evaluationsData) {
-    evaluationsData.forEach(element => {
-      database.transaction(function(tx) {
-        tx.executeSql(
-          "INSERT INTO periodic_evaluation (periodic_evaluation_id, periodic_evaluation_type_fk," +
-            "periodic_evaluation_username, periodic_evaluation_host, periodic_evaluation_canceled, periodic_evaluation_value," +
-            "periodic_evaluation_date, periodic_evaluation_subject_fk, periodic_evaluation_group_fk, periodic_evaluation_week," +
-            "periodic_evaluation_student_fk, periodic_evaluation_deleted, periodic_evaluation_updated, periodic_evaluation_modified) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-          [
-            element.ID_SIGENU,
-            element.Periodic_Evaluation_Type,
-            element.User_Name,
-            element.Host,
-            element.Cancelled,
-            element.Evaluation_Value,
-            element.Date,
-            element.Subject,
-            element.Grupo,
-            element.Week,
-            element.Student,
-            element.Deleted,
-            element.Updated,
-            element.Modified
-          ]
-        );
-      }, this.txError);
+  insertPeriodicEvaluations(evaluationsData, fn) {
+    var count = 0;
+    evaluationsData.forEach((element, index) => {
+      database.transaction(
+        function(tx) {
+          tx.executeSql(
+            "INSERT INTO periodic_evaluation (periodic_evaluation_id, periodic_evaluation_type_fk," +
+              "periodic_evaluation_username, periodic_evaluation_host, periodic_evaluation_canceled, periodic_evaluation_value," +
+              "periodic_evaluation_date, periodic_evaluation_subject_fk, periodic_evaluation_group_fk, periodic_evaluation_week," +
+              "periodic_evaluation_student_fk, periodic_evaluation_deleted, periodic_evaluation_updated, periodic_evaluation_modified) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            [
+              element.ID_SIGENU,
+              element.Periodic_Evaluation_Type,
+              element.User_Name,
+              element.Host,
+              element.Cancelled,
+              element.Evaluation_Value,
+              element.Date,
+              element.Subject,
+              element.Grupo,
+              element.Week,
+              element.Student,
+              element.Deleted,
+              element.Updated,
+              element.Modified
+            ]
+          );
+          count++;
+        },
+        this.txError,
+        function() {
+          if (count === evaluationsData.length) {
+            console.log("Insertadas las evaluaciones periódicas");
+            fn();
+          }
+        }
+      );
     });
   },
-  insertEvaluativeCuts(cutsData) {
-    cutsData.forEach(element => {
+  insertEvaluativeCuts(cutsData, fn) {
+    var count = 0;
+    cutsData.forEach((element, index) => {
       database.transaction(function(tx) {
         tx.executeSql(
           "INSERT INTO evaluative_cut (cut_group_planning_id, cut_first_court_header_id, cut_second_court_header_id, cut_first_delivered, cut_second_delivered) VALUES (?,?,?,?,?)",
@@ -484,71 +508,83 @@ export default {
           ]
         );
       }, this.txError);
-      database.transaction(function(tx) {
-        tx.executeSql(
-          "INSERT INTO student_cut (student_cut_abscent_hours_cut1, student_cut_abscent_hours_cut2, student_cut_assist_percent," +
-            "student_cut_cualitative_evaluation1, student_cut_cualitative_evaluation2, student_cut_student_fk," +
-            "student_cut_evaluative_cut_fk, student_cut_updated) VALUES (?,?,?,?,?,?,?,?) ",
-          [
-            element.Abscense_Hours_Court1,
-            element.Abscense_Hours_Court2,
-            element.Assistance_Percent,
-            element.Cualitative_Evaluation_C1,
-            element.Cualitative_Evaluation_C2,
-            element.Student_ID,
-            element.groupPlanningID,
-            element.Updated
-          ]
-        );
-      }, this.txError);
+      database.transaction(
+        function(tx) {
+          tx.executeSql(
+            "INSERT INTO student_cut (student_cut_abscent_hours_cut1, student_cut_abscent_hours_cut2, student_cut_assist_percent," +
+              "student_cut_cualitative_evaluation1, student_cut_cualitative_evaluation2, student_cut_student_fk," +
+              "student_cut_evaluative_cut_fk, student_cut_updated) VALUES (?,?,?,?,?,?,?,?) ",
+            [
+              element.Abscense_Hours_Court1,
+              element.Abscense_Hours_Court2,
+              element.Assistance_Percent,
+              element.Cualitative_Evaluation_C1,
+              element.Cualitative_Evaluation_C2,
+              element.Student_ID,
+              element.groupPlanningID,
+              element.Updated
+            ]
+          );
+          count++;
+        },
+        this.txError,
+        function() {
+          if (count === cutsData.length) {
+            console.log("Insertados los cortes evaluativos");
+            fn();
+          }
+        }
+      );
     });
   },
-  insertActivityTypes(activityData) {
-    activityData.forEach(element => {
-      database.transaction(function(tx) {
-        tx.executeSql(
-          "INSERT INTO activity_type (activity_type_id, activity_type_code, activity_type_name, activity_type_canceled) VALUES (?,?,?,?) ",
-          [element.ID_SIGENU, element.Code, element.Name, element.Cancelled]
-        );
-      }, this.txError);
-    });
-  },
-  insertEvaluationValues(valuesData) {
-    valuesData.forEach(element => {
-      database.transaction(function(tx) {
-        tx.executeSql(
-          "INSERT INTO evaluation_value (evaluation_value_id, evaluation_value, evaluation_value_canceled) VALUES (?,?,?) ",
-          [element.ID_SIGENU, element.Value, element.Cancelled]
-        );
-      }, this.txError);
-    });
-  },
-  insertCualitativeEvaluations(cualitativeData) {
-    cualitativeData.forEach(element => {
-      database.transaction(function(tx) {
-        tx.executeSql(
-          "INSERT INTO cualitative_evaluation (cualitative_evaluation_id, cualitative_evaluation_name, cualitative_evaluation_canceled) VALUES (?,?,?) ",
-          [element.ID_SIGENU, element.Name, element.Cancelled]
-        );
-      }, this.txError);
-    });
-  },
-  insertPeriodicEvaluationTypes(types) {
-    types.forEach(element => {
-      database.transaction(function(tx) {
-        tx.executeSql(
-          "INSERT INTO periodic_evaluation_type (periodic_evaluation_type_id, periodic_evaluation_type_name," +
-            "periodic_evaluation_type_code, periodic_evaluation_type_priority, periodic_evaluation_type_canceled) VALUES (?,?,?,?,?) ",
-          [
-            element.ID_SIGENU,
-            element.Name,
-            element.Code,
-            element.Priority,
-            element.Cancelled
-          ]
-        );
-      }, this.txError);
-    });
+  insertCodifiers(
+    activityData,
+    valuesData,
+    types,
+    cualitativeData,
+    control,
+    fn
+  ) {
+    database.transaction(
+      function(tx) {
+        activityData.forEach(element => {
+          tx.executeSql(
+            "INSERT INTO activity_type (activity_type_id, activity_type_code, activity_type_name, activity_type_canceled) VALUES (?,?,?,?) ",
+            [element.ID_SIGENU, element.Code, element.Name, element.Cancelled]
+          );
+        });
+        valuesData.forEach(element => {
+          tx.executeSql(
+            "INSERT INTO evaluation_value (evaluation_value_id, evaluation_value, evaluation_value_canceled) VALUES (?,?,?) ",
+            [element.ID_SIGENU, element.Value, element.Cancelled]
+          );
+        });
+        cualitativeData.forEach(element => {
+          tx.executeSql(
+            "INSERT INTO cualitative_evaluation (cualitative_evaluation_id, cualitative_evaluation_name, cualitative_evaluation_canceled) VALUES (?,?,?) ",
+            [element.ID_SIGENU, element.Name, element.Cancelled]
+          );
+        });
+        types.forEach(element => {
+          tx.executeSql(
+            "INSERT INTO periodic_evaluation_type (periodic_evaluation_type_id, periodic_evaluation_type_name," +
+              "periodic_evaluation_type_code, periodic_evaluation_type_priority, periodic_evaluation_type_canceled) VALUES (?,?,?,?,?) ",
+            [
+              element.ID_SIGENU,
+              element.Name,
+              element.Code,
+              element.Priority,
+              element.Cancelled
+            ]
+          );
+        });
+      },
+      this.txError,
+      function() {
+        control.inserted++;
+        fn();
+      }
+    );
   },
 
   //Database Queries...............................................................................................................................................
@@ -884,8 +920,7 @@ export default {
           if (
             results.rows.item(i).student_cut_cualitative_evaluation1 !==
               "undefined" &&
-            results.rows.item(i).student_cut_cualitative_evaluation1 !== ""
-            &&
+            results.rows.item(i).student_cut_cualitative_evaluation1 !== "" &&
             results.rows.item(i).student_cut_cualitative_evaluation1 !== "NE"
           ) {
             cuts.push({
@@ -902,8 +937,7 @@ export default {
           if (
             results.rows.item(i).student_cut_cualitative_evaluation2 !==
               "undefined" &&
-            results.rows.item(i).student_cut_cualitative_evaluation2 !== ""
-            &&
+            results.rows.item(i).student_cut_cualitative_evaluation2 !== "" &&
             results.rows.item(i).student_cut_cualitative_evaluation2 !== "NE"
           ) {
             cuts.push({

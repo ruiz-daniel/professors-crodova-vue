@@ -1,7 +1,14 @@
 <template>
   <div id="app">
-    <Toast></Toast>
     <Navigation />
+    <div v-if="$root.loading">
+      <Message severity="info" :sticky="true" :closable="false"
+        >Cargando datos</Message
+      >
+      <ProgressBar :value="$root.controlData.inserted * 10" />
+    </div>
+
+    <Toast></Toast>
     <router-view />
     <Sidebar />
     <InfoSidebar />

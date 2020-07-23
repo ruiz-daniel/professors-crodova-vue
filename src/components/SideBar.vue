@@ -45,7 +45,7 @@ export default {
           label: "Actualizar Datos",
           items: [
             {
-              label: "Desde un archivo local",
+              label: "Juego de Datos de Prueba",
               command: () => {
                 this.$root.populateDB(this.$root.fileData);
               }
