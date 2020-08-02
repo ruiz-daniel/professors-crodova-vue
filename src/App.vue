@@ -1,7 +1,21 @@
 <template>
   <div id="app">
-    <Toast></Toast>
     <Navigation />
+    <div v-if="$root.loading">
+      <Message severity="info" :sticky="true" :closable="false"
+        >Cargando datos...</Message
+      >
+      <ProgressBar :value="$root.controlData.inserted * 10" />
+    </div>
+    <Message
+      v-if="$root.controlData.loadingRequest"
+      severity="info"
+      :sticky="true"
+      :closable="false"
+      >Conectando con el servidor...</Message
+    >
+
+    <Toast></Toast>
     <router-view />
     <Sidebar />
     <InfoSidebar />

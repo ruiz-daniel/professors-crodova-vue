@@ -1,74 +1,61 @@
 <template>
   <div id="p-formgroup-inline">
     <div class="p-field">
-      <h4>Registrar Evaluaciones Periódicas</h4>
+      <h4>Registrar Evaluación Periódica</h4>
       <h4>{{ $store.state.subjectName }} Grupo {{ $store.state.groupName }}</h4>
     </div>
-
     <div class="p-field">
-      <Dropdown
-        v-model="student"
-        :options="$store.state.students"
-        optionLabel="StudentName"
-        placeholder="Seleccione un estudiante"
-      />
-      <Button
-        icon="pi pi-check"
-        v-on:click="
-          getPeriodicEvaluations(student);
-          studentSelected = true;
-        "
-      />
-      <Button
-        icon="pi pi-times"
-        v-on:click="
-          student = {};
-          studentSelected = false;
-        "
+      <label for="date" style="margin-right:0.3rem">Fecha</label>
+      <Calendar
+        id="date"
+        placeholder="Fecha"
+        v-model="date"
+        dateFormat="dd/mm/yy"
       />
     </div>
-    <div class="p-field" v-if="studentSelected">
-      <h5>Agregar Evaluación</h5>
-
+    <div class="p-field">
+      <Dropdown
+        v-model="week"
+        :options="listWeeks()"
+        placeholder="Sem."
+        style="margin-right:0.5rem"
+      />
       <Dropdown
         v-model="evaluation_type"
         :options="$store.state.periodicEvaluationTypes"
         optionLabel="Code"
         placeholder="Act."
       />
-      <Button icon="pi pi-question" v-on:click="toggle" />
-      <Dropdown v-model="week" :options="listWeeks()" placeholder="Sem." />
-      <Dropdown
-        v-model="evaluation"
-        :options="listEvaluationValues()"
-        placeholder="Nota"
-      />
-      <Button icon="pi pi-plus" v-on:click="registerEvaluation()" />
       <Button
-        icon="pi pi-times"
-        v-on:click="
-          evaluation_type = {};
-          week = {};
-          evaluation = {};
-        "
+        icon="pi pi-question"
+        v-on:click="toggle"
+        style="margin-right: 0.5rem"
       />
     </div>
-    <div class="p-field" v-if="studentSelected">
-      <Calendar placeholder="Fecha" v-model="date" dateFormat="dd/mm/yy" />
+    <div class="p-field">
+      <Button
+        icon="pi pi-save"
+        label="Guardar Cambios"
+        v-on:click="registerEvaluation"
+      />
     </div>
-    <DataTable :value="this.$store.state.info" v-if="studentSelected">
-      <Column field="type" header="Actividad">
+    <DataTable :value="this.evaluations">
+      <Column field="student" header="Estudiante">
         <template #body="slotProps">
-          {{ slotProps.data.EvaluationTypeCode }}
+          {{ slotProps.data.StudentName }}
         </template>
       </Column>
       <Column field="evaluation" header="Evaluación">
         <template #body="slotProps">
-          {{ slotProps.data.EvaluationValue }}
+          <Dropdown
+            v-model="slotProps.data.Evaluation_Value"
+            :options="listEvaluationValues()"
+            style="max-Width: 100px"
+          />
         </template>
       </Column>
     </DataTable>
-    <OverlayPanel ref="op">
+    <OverlayPanel ref="op" :showCloseIcon="true">
       <p style="color:orange; font-weight: bold;">
         Tipos de Evaluaciones Periodicas
       </p>
@@ -90,15 +77,38 @@
 export default {
   data() {
     return {
-      student: {},
-      studentSelected: false,
-      evaluation_type: {},
+      evaluation_type: "",
       week: {},
-      date: null,
-      evaluation: {}
+      date: new Date(),
+      evaluations: []
     };
   },
   methods: {
+    createEvaluations() {
+      var students = this.$store.state.students;
+      students.forEach(element => {
+        this.evaluations.push({
+          Periodic_Evaluation_Type: "",
+          Cancelled: false,
+          Evaluation_Value: "",
+          Date:
+            this.date.getDate() +
+            "-" +
+            (this.date.getMonth() + 1) +
+            "-" +
+            this.date.getFullYear(),
+          Subject: this.$store.state.subjectID,
+          Grupo: this.$store.state.groupID,
+          Week: this.week,
+          Student: element.StudentID,
+          StudentName: element.StudentName,
+          Deleted: false,
+          Updated: false,
+          User_Name: "",
+          Host: ""
+        });
+      });
+    },
     getPeriodicEvaluations(selectedStudent) {
       var store = this.$store;
       this.$root.Database.getPeriodicEvaluationsFromStudent(
@@ -116,51 +126,21 @@ export default {
     listEvaluationValues() {
       return ["2", "3", "4", "5"];
     },
-    addtoInfo() {
-      this.$store.commit("ADD_INFO", {
-        EvaluationTypeCode: this.evaluation_type.Code,
-        EvaluationType: this.evaluation_type.ID,
-        EvaluationValue: this.evaluation,
-        Date:
-          this.date.getDate() +
-          "-" +
-          (this.date.getMonth() + 1) +
-          "-" +
-          this.date.getFullYear(),
-        Week: this.week,
-        Deleted: false,
-        Updated: false
-      });
-    },
     registerEvaluation() {
       var toast = this.$toast;
-      if (
-        this.evaluation_type != {} &&
-        this.week > 0 &&
-        this.evaluation.length != {}
-      ) {
-        this.$root.Database.insertPeriodicEvaluations([
-          {
-            Periodic_Evaluation_Type: this.evaluation_type.ID,
-            Cancelled: false,
-            Evaluation_Value: this.evaluation,
-            Date:
-          this.date.getDate() +
-          "-" +
-          (this.date.getMonth() + 1) +
-          "-" +
-          this.date.getFullYear(),
-            Subject: this.$store.state.subjectID,
-            Grupo: this.$store.state.groupID,
-            Week: this.week,
-            Student: this.student.StudentID,
-            Deleted: false,
-            Updated: false,
-            User_Name: "",
-            Host: ""
-          }
-        ]);
-        this.addtoInfo();
+      if (this.evaluation_type != "" && this.week > 0) {
+        this.evaluations.forEach(element => {
+          element.Periodic_Evaluation_Type = this.evaluation_type.ID;
+          element.Date =
+            this.date.getDate() +
+            "-" +
+            (this.date.getMonth() + 1) +
+            "-" +
+            this.date.getFullYear();
+          element.Week = this.week;
+          if (element.Evaluation_Value === "") element.Evaluation_Value = "2";
+        });
+        this.$root.Database.insertPeriodicEvaluations(this.evaluations);
       } else {
         toast.add({
           severity: "error",
@@ -173,6 +153,9 @@ export default {
     toggle(event) {
       this.$refs.op.toggle(event);
     }
+  },
+  created() {
+    this.createEvaluations();
   }
 };
 </script>
@@ -185,5 +168,9 @@ export default {
   width: 100%;
   align-self: center;
   margin-top: 1rem;
+}
+.p-button {
+  margin-left: 0.3rem;
+  margin-right: 0.3rem;
 }
 </style>
