@@ -70,8 +70,7 @@ new Vue({
     fileData,
     sideMenuVisible: false,
     sideInfoVisible: false,
-    loadingRequest: false,
-    controlData: { inserted: 0 }
+    controlData: { inserted: 0, loadingRequest: false }
   },
   computed: {
     loading() {
@@ -307,7 +306,7 @@ new Vue({
     //............................................................................................
 
     getAllDataFromServer() {
-      APICalls.getAllData(this.loadingRequest, this.populateDB);
+      APICalls.getAllData(this.controlData, this.populateDB);
     },
 
     updateToServer() {

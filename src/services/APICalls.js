@@ -30,12 +30,12 @@ export default {
   getBaseURL() {
     return baseURL;
   },
-  getAllData(loading, fn) {
+  getAllData(control, fn) {
     var allData = {};
-    loading = true;
+    control.loading = true;
     axios.get(baseURL + "/sigenu-rest/teachers/getAllData").then(response => {
       allData = response.data;
-      loading = false;
+      control.loading = false;
       fn(allData);
     });
   },
