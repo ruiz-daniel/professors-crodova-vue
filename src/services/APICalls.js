@@ -11,10 +11,10 @@ export default {
     AUTH_CREDENTIALS = username + ":" + password;
     headers = {
       Authorization: `Basic ${btoa(AUTH_CREDENTIALS)}`,
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "*",
-      "Access-Control-Allow-Headers": "*",
-      "Access-Control-Allow-Credentials": true,
+      // "Access-Control-Allow-Origin": "*",
+      // "Access-Control-Allow-Methods": "*",
+      // "Access-Control-Allow-Headers": "*",
+      // "Access-Control-Allow-Credentials": true,
       "Content-Type": "application/json"
     };
     console.log(headers);
@@ -25,23 +25,27 @@ export default {
   getBaseURL() {
     return baseURL;
   },
-  getAllData(loading, fn) {
+  getAllData(control, fn) {
     var allData = {};
-    loading = true;
+    control.loadingRequest = true;
+    // fetch(baseURL + "/sigenu-rest/teachers/getAllData", {
+    //   method: "GET",
+    //   headers: headers
+    // })
     axios
       .request({
         method: "get",
         url: baseURL + "/sigenu-rest/teachers/getAllData",
-        // auth: {
-        //   username: 'drg3',
-        //   password: '123'
-        // }
-        headers: headers,
-        withCredentials: true
+        auth: {
+          username: 'drg',
+          password: '123'
+        }
+        //headers: headers,
+        //withCredentials: true,
       })
       .then(response => {
         allData = response.data;
-        loading = false;
+        control.loadingRequest = false;
         fn(allData);
       });
   },

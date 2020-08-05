@@ -277,6 +277,7 @@ new Vue({
     },
     populateDBPeriodicEvaluations(data, control) {
       var evaluationsData = [];
+      
       data.teacher_data.Grupos.forEach(elementGroup => {
         elementGroup.Students.forEach(studentElement => {
           studentElement.Periodic_Evaluation.forEach(element => {
@@ -306,6 +307,7 @@ new Vue({
     //............................................................................................
 
     getAllDataFromServer() {
+
       APICalls.getAllData(this.controlData, this.populateDB);
     },
 

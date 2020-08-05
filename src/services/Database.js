@@ -237,7 +237,7 @@ export default {
         );
       },
       this.txError,
-      function(){
+      function() {
         console.log("Insertados los datos del profesor");
       }
     );
@@ -455,7 +455,9 @@ export default {
   },
 
   insertPeriodicEvaluations(evaluationsData, fn) {
+    console.log("HERE" + evaluationsData.length);
     var count = 0;
+    if (evaluationsData.length === 0) fn();
     evaluationsData.forEach((element, index) => {
       database.transaction(
         function(tx) {
