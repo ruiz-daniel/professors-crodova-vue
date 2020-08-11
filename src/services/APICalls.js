@@ -3,21 +3,13 @@ import axios from "axios";
 
 //const AUTH_CREDENTIALS = `${username}:${password}`;
 var baseURL = "http://localhost";
-var AUTH_CREDENTIALS = {};
-var headers = {};
+var user = "";
+var pass = "";
 
 export default {
   createHeaders(username, password) {
-    AUTH_CREDENTIALS = username + ":" + password;
-    headers = {
-      Authorization: `Basic ${btoa(AUTH_CREDENTIALS)}`,
-      // "Access-Control-Allow-Origin": "*",
-      // "Access-Control-Allow-Methods": "*",
-      // "Access-Control-Allow-Headers": "*",
-      // "Access-Control-Allow-Credentials": true,
-      "Content-Type": "application/json"
-    };
-    console.log(headers);
+    user = username;
+    pass = password;
   },
   stateBaseURL(url) {
     baseURL = url;
@@ -25,38 +17,41 @@ export default {
   getBaseURL() {
     return baseURL;
   },
+  getUser() {
+    return user;
+  },
+  getPass() {
+    return pass;
+  },
   getAllData(control, fn) {
     var allData = {};
     control.loadingRequest = true;
-    // fetch(baseURL + "/sigenu-rest/teachers/getAllData", {
-    //   method: "GET",
-    //   headers: headers
-    // })
     axios
       .request({
         method: "get",
         url: baseURL + "/sigenu-rest/teachers/getAllData",
         auth: {
-          username: 'drg',
-          password: '123'
+          username: user,
+          password: pass
         }
-        //headers: headers,
-        //withCredentials: true,
       })
       .then(response => {
         allData = response.data;
         control.loadingRequest = false;
         fn(allData);
+      })
+      .catch(error => {
+        control.loadingRequest = false;
+        control.connectionFailed();
       });
   },
 
-  updateAssistToServer(assistsData, index, size) {
+  updateAssistToServer(assistsData, index, size, fn) {
     if (index === size) {
-      console.log("finished");
+      fn();
       return "finished";
     } else {
       var element = assistsData[index];
-      console.log(element);
       axios
         .request({
           method: "get",
@@ -74,39 +69,56 @@ export default {
             Second_Turn: element.Second_Turn,
             Modified: element.Modified
           },
-          //headers: headers
-          withCredentials: true
+          auth: {
+            username: user,
+            password: pass
+          }
         })
         .then(response => {
-          this.updateAssistToServer(assistsData, index + 1, size);
+          this.updateAssistToServer(assistsData, index + 1, size, fn);
         });
     }
   },
-  updateEndEvaluationsToServer(evaluationsData) {
-    evaluationsData.forEach(element => {
-      axios.request({
-        method: "get",
-        url: baseURL + "/sigenu-rest/teachers/registerEndEvaluation",
-        params: {
-          Group_ID: element.Group_ID,
-          Subject_ID: element.Subject_ID,
-          ID_Acta: element.ID_Acta,
-          Convocatoria: element.Convocatoria,
-          Exam_Evaluation: element.Exam_Evaluation,
-          Final_Evaluation: element.Final_Evaluation,
-          Student_ID: element.Student_ID,
-          Matriculated_Subject_ID: element.Matriculated_Subject_ID,
-          Teacher_Name: element.Teacher_Name,
-          Update: element.Update
-        },
-        //headers: headers
-        withCredentials: true
-      });
-    });
-  },
-  updateEvaluativeCutsToServer(cutsData, index, size) {
+  updateEndEvaluationsToServer(evaluationsData, index, size, fn) {
     if (index === size) {
-      console.log("finished");
+      fn();
+      return "finished";
+    } else {
+      var element = evaluationsData[index];
+      axios
+        .request({
+          method: "get",
+          url: baseURL + "/sigenu-rest/teachers/registerEndEvaluation",
+          params: {
+            Group_ID: element.Group_ID,
+            Subject_ID: element.Subject_ID,
+            ID_Acta: element.ID_Acta,
+            Convocatoria: element.Convocatoria,
+            Exam_Evaluation: element.Exam_Evaluation,
+            Final_Evaluation: element.Final_Evaluation,
+            Student_ID: element.Student_ID,
+            Matriculated_Subject_ID: element.Matriculated_Subject_ID,
+            Teacher_Name: element.Teacher_Name,
+            Update: element.Update
+          },
+          auth: {
+            username: user,
+            password: pass
+          }
+        })
+        .then(
+          this.updateEndEvaluationsToServer(
+            evaluationsData,
+            index + 1,
+            size,
+            fn
+          )
+        );
+    }
+  },
+  updateEvaluativeCutsToServer(cutsData, index, size, fn) {
+    if (index === size) {
+      fn();
       return "finished";
     } else {
       var element = cutsData[index];
@@ -126,33 +138,51 @@ export default {
             FirstHeader: element.FirstHeader,
             SecondHeader: element.SecondHeader
           },
-          //headers: headers
-          withCredentials: true
+          auth: {
+            username: user,
+            password: pass
+          }
         })
         .then(response => {
-          this.updateEvaluativeCutsToServer(cutsData, index + 1, size);
+          this.updateEvaluativeCutsToServer(cutsData, index + 1, size, fn);
         });
     }
   },
-  updatePeriodicEvaluationsToServer(evaluationsdata) {
-    evaluationsdata.forEach(element => {
-      axios.request({
-        method: "get",
-        url: baseURL + "/sigenu-rest/teachers/registerPeriodicEvaluation",
-        params: {
-          Student_ID: element.Student_ID,
-          Evaluation_Value: element.Evaluation_Value,
-          Type: element.Type,
-          Date: element.Date,
-          Subject_ID: element.Subject_ID,
-          Group_ID: element.Group_ID,
-          Week: element.Week,
-          Teacher_ID: element.Teacher_ID,
-          Teacher_Name: element.Teacher_Name
-        },
-        //headers: headers
-        withCredentials: true
-      });
-    });
+  updatePeriodicEvaluationsToServer(evaluationsdata, index, size, fn) {
+    if (index === size) {
+      fn();
+      return "finished";
+    } else {
+      var element = evaluationsdata[index];
+      console.log(element);
+      axios
+        .request({
+          method: "get",
+          url: baseURL + "/sigenu-rest/teachers/registerPeriodicEvaluation",
+          params: {
+            Student_ID: element.Student_ID,
+            Evaluation_Value: element.Evaluation_Value,
+            Type: element.Type,
+            Date: element.Date,
+            Subject_ID: element.Subject_ID,
+            Group_ID: element.Group_ID,
+            Week: element.Week,
+            Teacher_ID: element.Teacher_ID,
+            Teacher_Name: element.Teacher_Name
+          },
+          auth: {
+            username: user,
+            password: pass
+          }
+        })
+        .then(response => {
+          this.updatePeriodicEvaluationsToServer(
+            evaluationsdata,
+            index + 1,
+            size,
+            fn
+          );
+        });
+    }
   }
 };

@@ -12,8 +12,29 @@
       severity="info"
       :sticky="true"
       :closable="false"
-      >Conectando con el servidor...</Message
+      >Recibiendo datos del servidor...</Message
     >
+    <Message
+      v-if="$root.controlData.updated > 0 && $root.controlData.updated < 4"
+      severity="info"
+      :sticky="true"
+      :closable="false"
+      >Enviando datos al servidor...</Message
+    >
+
+    <Message
+      v-if="$root.controlData.updated === 4"
+      severity="warning"
+      :sticky="true"
+      :closable="false"
+      >Datos enviados al servidor. Actualice sus datos locales</Message
+    >
+
+    <Button
+      label="Actualizar"
+      v-if="$root.controlData.updated === 4"
+      v-on:click="getDataFromServer()"
+    />
 
     <Toast></Toast>
     <router-view />
@@ -32,6 +53,26 @@ export default {
     Navigation,
     Sidebar,
     InfoSidebar
+  },
+  methods: {
+    getDataFromServer() {
+      this.$root.controlData.updated = 0;
+      if (
+        this.$root.APICalls.getUser() != "" &&
+        this.$root.APICalls.getPass() != ""
+      ) {
+        this.$router.push("/");
+        this.$root.getAllDataFromServer();
+      } else {
+        this.$toast.add({
+          severity: "error",
+          detail: "Configure usuario y contraseña",
+          life: 3000
+        });
+        this.$root.controlData.configUserForServer = true;
+        this.$router.push({ name: "Configuration" });
+      }
+    }
   }
 };
 </script>

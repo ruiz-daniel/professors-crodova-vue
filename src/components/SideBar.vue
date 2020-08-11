@@ -53,7 +53,22 @@ export default {
             {
               label: "Desde el servidor",
               command: () => {
-                this.$root.getAllDataFromServer();
+                this.$root.sideMenuVisible = false;
+                if (
+                  this.$root.APICalls.getUser() != "" &&
+                  this.$root.APICalls.getPass() != ""
+                ) {
+                  this.$router.push("/");
+                  this.$root.getAllDataFromServer();
+                } else {
+                  this.$toast.add({
+                    severity: "error",
+                    detail: "Configure usuario y contraseña",
+                    life: 3000
+                  });
+                  this.$root.controlData.configUserForServer = true;
+                  this.$router.push({ name: "Configuration" });
+                }
               }
             },
             {

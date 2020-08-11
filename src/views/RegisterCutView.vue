@@ -30,7 +30,7 @@
         <template #body="slotProps">
           <Dropdown
             v-model="slotProps.data.CualitativeEvaluation2"
-            v-if="slotProps.data.FirstDelivered === true"
+            v-if="slotProps.data.FirstDelivered === 'true'"
             :options="evaluationsOptions"
             placeholder="NE"
           />

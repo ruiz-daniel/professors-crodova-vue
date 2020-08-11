@@ -43,16 +43,21 @@ export default {
       password: ""
     };
   },
-  methods:{
-    submit(){
+  methods: {
+    submit() {
       this.$root.APICalls.stateBaseURL(this.serverURL);
       this.$root.APICalls.createHeaders(this.username, this.password);
+      this.$root.Database.insertLoginData(this.username, this.password);
+      if (this.$root.controlData.configUserForServer === true){
+        this.$root.getAllDataFromServer();
+        this.$root.controlData.configUserForServer = false;
+      }
       this.$toast.add({
-          severity: "success",
-          summary: "Exito",
-          detail: "Se han guardado las configuraciones",
-          life: 3000
-        });
+        severity: "success",
+        summary: "Exito",
+        detail: "Se han guardado las configuraciones",
+        life: 3000
+      });
     }
   }
 };

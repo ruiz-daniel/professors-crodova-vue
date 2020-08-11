@@ -93,9 +93,10 @@ const queryCutsForUpdate =
   "WHERE student_cut_updated = 'false'";
 
 const queryPeriodicEvaluationsForUpdate =
-  "SELECT periodic_evaluation_student_fk, periodic_evaluation_value, periodic_evaluation_date, periodic_evaluation_type_fk, " +
+  "SELECT periodic_evaluation_student_fk, evaluation_value_id, periodic_evaluation_date, periodic_evaluation_type_fk, " +
   "periodic_evaluation_subject_fk, periodic_evaluation_group_fk, periodic_evaluation_week, periodic_evaluation_modified, teacher_id, teacher_name " +
   "FROM periodic_evaluation " +
+  "JOIN evaluation_value ON periodic_evaluation.periodic_evaluation_value = evaluation_value.evaluation_value " +
   "JOIN teacher_data " +
   "WHERE periodic_evaluation_updated = 'false'";
 
@@ -114,6 +115,17 @@ export default {
       2000000
     );
     this.createTables();
+  },
+  isDatabasePopulated(fn) {
+    database.transaction(function(tx) {
+      tx.executeSql("SELECT * FROM group_planning", [], function(tx, results) {
+        if (results.rows.length > 0) {
+          fn(true);
+        } else {
+          fn(false);
+        }
+      });
+    });
   },
   // Success and Error Functions..............................................................
   txError(error) {
@@ -155,6 +167,7 @@ export default {
         tx.executeSql("DROP TABLE IF EXISTS evaluation_value");
         tx.executeSql("DROP TABLE IF EXISTS cualitative_evaluation");
         tx.executeSql("DROP TABLE IF EXISTS periodic_evaluation_type");
+        tx.executeSql("DROP TABLE IF EXISTS login_data");
       },
       function(err) {
         console.log(err.message);
@@ -173,6 +186,9 @@ export default {
   queryTables(tx) {
     tx.executeSql(
       "CREATE TABLE IF NOT EXISTS teacher_data (teacher_id unique, teacher_name)"
+    );
+    tx.executeSql(
+      "CREATE TABLE IF NOT EXISTS login_data (username unique, password)"
     );
     tx.executeSql(
       "CREATE TABLE IF NOT EXISTS student_group (group_id unique, group_name unique)"
@@ -243,8 +259,32 @@ export default {
     );
   },
 
+  insertLoginData(username, password) {
+    database.transaction(
+      function(tx) {
+        tx.executeSql(
+          "INSERT INTO login_data (username, password) VALUES (?, ?)",
+          [username, password]
+        );
+      },
+      this.txError,
+      function() {
+        console.log("Insertados los datos del usuario");
+      }
+    );
+  },
+
+  getLoginData(fn) {
+    database.transaction(function(tx) {
+      tx.executeSql("SELECT * FROM login_data", [], function(tx, results) {
+        fn(results.rows.item(0).username, results.rows.item(0).password);
+      });
+    }, this.txError);
+  },
+
   insertGroups(groupsData, fn) {
     var count = 0;
+    if (groupsData.length === 0) fn();
     groupsData.forEach(element => {
       database.transaction(
         function(tx) {
@@ -265,6 +305,7 @@ export default {
     });
   },
   insertStudents(studentsData, fn) {
+    if (studentsData.length === 0) fn();
     var count = 0;
     studentsData.forEach(element => {
       database.transaction(
@@ -292,6 +333,7 @@ export default {
     });
   },
   insertGroupPlannings(planningData, fn) {
+    if (planningData.length === 0) fn();
     database.transaction(
       function(tx) {
         planningData.forEach((element, index) => {
@@ -312,6 +354,7 @@ export default {
     );
   },
   insertSubjects(subjectsData, fn) {
+    if (subjectsData.length === 0) fn();
     database.transaction(
       function(tx) {
         subjectsData.forEach(element => {
@@ -329,6 +372,7 @@ export default {
     );
   },
   insertAssists(assistsData, groupPlanningID, subjectHours, fn) {
+    if (assistsData.length === 0) fn();
     this.getEvaluativeCutsFromGroup(groupPlanningID, function(cuts) {
       database.transaction(
         function(tx) {
@@ -409,6 +453,7 @@ export default {
     });
   },
   insertEndEvaluations(evaluationsData, fn) {
+    if (evaluationsData.length === 0) fn();
     var count = 0;
     evaluationsData.forEach((element, index) => {
       database.transaction(
@@ -455,7 +500,6 @@ export default {
   },
 
   insertPeriodicEvaluations(evaluationsData, fn) {
-    console.log("HERE" + evaluationsData.length);
     var count = 0;
     if (evaluationsData.length === 0) fn();
     evaluationsData.forEach((element, index) => {
@@ -496,6 +540,7 @@ export default {
     });
   },
   insertEvaluativeCuts(cutsData, fn) {
+    if (cutsData.length === 0) fn();
     var count = 0;
     cutsData.forEach((element, index) => {
       database.transaction(function(tx) {
@@ -968,7 +1013,7 @@ export default {
         for (let i = 0; i < results.rows.length; i++) {
           evaluations.push({
             Student_ID: results.rows.item(i).periodic_evaluation_student_fk,
-            Evaluation_Value: results.rows.item(i).periodic_evaluation_value,
+            Evaluation_Value: results.rows.item(i).evaluation_value_id,
             Type: results.rows.item(i).periodic_evaluation_type_fk.toString(),
             Date: new Date(
               results.rows.item(i).periodic_evaluation_date

@@ -70,7 +70,16 @@ new Vue({
     fileData,
     sideMenuVisible: false,
     sideInfoVisible: false,
-    controlData: { inserted: 0, loadingRequest: false }
+    controlData: {
+      inserted: 0,
+      updated: 0,
+      loadingRequest: false,
+      configUserForServer: false,
+      connectionFailed: function() {
+        alert("Conexión fallida");
+      },
+      databaseStatusOk: true
+    }
   },
   computed: {
     loading() {
@@ -277,7 +286,7 @@ new Vue({
     },
     populateDBPeriodicEvaluations(data, control) {
       var evaluationsData = [];
-      
+
       data.teacher_data.Grupos.forEach(elementGroup => {
         elementGroup.Students.forEach(studentElement => {
           studentElement.Periodic_Evaluation.forEach(element => {
@@ -307,7 +316,6 @@ new Vue({
     //............................................................................................
 
     getAllDataFromServer() {
-
       APICalls.getAllData(this.controlData, this.populateDB);
     },
 
@@ -319,23 +327,45 @@ new Vue({
     },
 
     updateAssistToServer() {
+      var control = this.controlData;
       Database.getAssistsForUpdate(function(assists) {
-        APICalls.updateAssistToServer(assists, 0, assists.length);
+        APICalls.updateAssistToServer(assists, 0, assists.length, function() {
+          control.updated++;
+        });
       });
     },
     updateEndEvaluationsToServer() {
+      var control = this.controlData;
       Database.getEndEvaluationsForUpdate(function(evaluations) {
-        APICalls.updateEndEvaluationsToServer(evaluations);
+        APICalls.updateEndEvaluationsToServer(
+          evaluations,
+          0,
+          evaluations.length,
+          function() {
+            control.updated++;
+          }
+        );
       });
     },
     updateEvaluativeCutsToServer() {
+      var control = this.controlData;
       Database.getEvaluativeCutsForUpdate(function(cuts) {
-        APICalls.updateEvaluativeCutsToServer(cuts, 0, cuts.length);
+        APICalls.updateEvaluativeCutsToServer(cuts, 0, cuts.length, function() {
+          control.updated++;
+        });
       });
     },
     updatePeriodicEvaluationsToServer() {
+      var control = this.controlData;
       Database.getPeriodicdEvaluationsForUpdate(function(evaluations) {
-        APICalls.updatePeriodicEvaluationsToServer(evaluations);
+        APICalls.updatePeriodicEvaluationsToServer(
+          evaluations,
+          0,
+          evaluations.length,
+          function() {
+            control.updated++;
+          }
+        );
       });
     },
     getCodifiers() {
@@ -351,12 +381,42 @@ new Vue({
       Database.getEvaluationValues(function(results) {
         store.commit("LOAD_EVALUATION_VALUES", results);
       });
+    },
+
+    checkDatabase() {
+      var codifiers = this.getCodifiers;
+      var control = this.controlData;
+      var toast = this.$toast;
+      Database.isDatabasePopulated(function(status) {
+        if (!status) {
+          control.databaseStatusOk = false;
+          toast.add({
+            severity: "error",
+            detail:
+              "Base de Datos Vacía. Conectese al servidor para cargar sus datos",
+            life: 3000
+          });
+        } else {
+          codifiers();
+        }
+      });
     }
   },
 
   mounted() {
     Database.initDatabase();
-    this.getCodifiers();
+    this.checkDatabase();
+    Database.getLoginData(function(username, password) {
+      if (
+        username != "" &&
+        username != "undefined" &&
+        password != "" &&
+        password != "undefined"
+      ) {
+        console.log(username);
+        APICalls.createHeaders(username, password);
+      }
+    });
     Database.setToastService(this.$toast);
     router.push("/");
   },

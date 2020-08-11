@@ -42,7 +42,7 @@ const routes = [
   {
     path: "/RegisterCut",
     name: "RegisterCut",
-    component: RegisterCutView,
+    component: RegisterCutView
   },
   {
     path: "/InsertPeriodicEvaluation",
