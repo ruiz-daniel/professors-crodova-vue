@@ -1,7 +1,7 @@
 <template>
   <div class="p-grid p-justify-center">
     <div
-      class="p-col-10 p-sm-12 p-md-6 p-lg-3 p-xl-3"
+      class="p-col-10 p-sm-10 p-md-8 p-lg-7 p-xl-7"
       style="padding:0px; margin-top:1rem"
     >
       <Card id="card" class="p-shadow-2">
@@ -32,7 +32,7 @@
       </Card>
     </div>
     <div
-      class="p-col-10 p-sm-12 p-md-6 p-lg-3 p-xl-3"
+      class="p-col-10 p-sm-10 p-md-8 p-lg-7 p-xl-7"
       style="padding:0px; margin-top:1rem"
     >
       <Card id="card" class="p-shadow-2">
@@ -72,7 +72,7 @@
       </Card>
     </div>
     <div
-      class="p-col-10 p-sm-12 p-md-6 p-lg-3 p-xl-3"
+      class="p-col-10 p-sm-10 p-md-8 p-lg-7 p-xl-7"
       style="padding:0px; margin-top:1rem"
     >
       <Card id="card" class="p-shadow-2">
@@ -103,7 +103,7 @@
       </Card>
     </div>
     <div
-      class="p-col-10 p-sm-12 p-md-6 p-lg-3 p-xl-3"
+      class="p-col-10 p-sm-10 p-md-8 p-lg-7 p-xl-7"
       style="padding:0px; margin-top:1rem"
     >
       <Card id="card" class="p-shadow-2">

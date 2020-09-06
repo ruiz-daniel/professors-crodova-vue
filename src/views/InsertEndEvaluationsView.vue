@@ -11,7 +11,7 @@
     </div>
     <div class="p-field">
       <DataTable :value="evaluations">
-        <Column field="student" header="Estudiante">
+        <Column field="student" header="Estud.">
           <template #body="slotProps">
             {{ slotProps.data.StudentName }}
           </template>

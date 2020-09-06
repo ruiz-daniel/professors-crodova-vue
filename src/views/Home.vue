@@ -1,6 +1,6 @@
 <template>
   <div class="p-grid p-justify-center" style="margin-top:1rem">
-    <div class="p-col-8">
+    <div class="p-col-8 p-lg-7 pxl-7">
       <Card id="card" class="p-shadow-2">
         <template slot="header"> </template>
         <template slot="title">
