@@ -94,7 +94,7 @@ export default {
   background-color: white;
   color: black;
   border-style: double;
-  margin: 0.5rem;
+  
 }
 .p-card-title {
   color: black;

@@ -70,13 +70,6 @@ export default {
                   this.$router.push({ name: "Configuration" });
                 }
               }
-            },
-            {
-              label: "Reiniciar Base de Datos local",
-              icon: "pi pi-refresh",
-              command: () => {
-                this.$root.Database.resetDatabase();
-              }
             }
           ]
         },
