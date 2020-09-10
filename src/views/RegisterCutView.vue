@@ -77,14 +77,25 @@ export default {
       });
     },
     registerCut() {
+      var toast = this.$toast;
+      var cutsForUpdate = [];
       this.cuts.forEach((element, index) => {
         if (
           element.CualitativeEvaluation1 !==
             this.cutsOld[index].CualitativeEvaluation1 ||
           element.CualitativeEvaluation2 !==
             this.cutsOld[index].CualitativeEvaluation2
-        )
-          this.$root.Database.updateEvaluativeCut(element);
+        ) {
+          cutsForUpdate.push(element);
+        }
+      });
+      this.$root.Database.updateEvaluativeCut(cutsForUpdate, function() {
+        toast.add({
+          severity: "success",
+          summary: "Éxito",
+          detail: "Se han actualizado las evaluaciones",
+          life: 3000
+        });
       });
     }
   },

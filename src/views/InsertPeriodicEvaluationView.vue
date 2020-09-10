@@ -140,7 +140,17 @@ export default {
           element.Week = this.week;
           if (element.Evaluation_Value === "") element.Evaluation_Value = "2";
         });
-        this.$root.Database.insertPeriodicEvaluations(this.evaluations);
+        this.$root.Database.insertPeriodicEvaluations(
+          this.evaluations,
+          function() {
+            toast.add({
+              severity: "success",
+              summary: "Éxito",
+              detail: "Se han registrado las evaluaciones",
+              life: 3000
+            });
+          }
+        );
       } else {
         toast.add({
           severity: "error",

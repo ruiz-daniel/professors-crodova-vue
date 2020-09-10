@@ -67,7 +67,7 @@ const queryUpdateEvaluativeCuts =
 
 const queryUpdateAssist =
   "UPDATE assist " +
-  "SET assist_first_turn = ?, assist_second_turn = ?, assist_updated = ? assist_modified = ? " +
+  "SET assist_first_turn = ?, assist_second_turn = ?, assist_updated = ?, assist_modified = ? " +
   "WHERE assist_student_fk = ? AND assist_subject_fk = ? AND assist_date = ? AND assist_activity_type_fk = ? ";
 
 const queryUpdatePeriodicEvaluation =
@@ -865,33 +865,51 @@ export default {
     });
   },
   //Update Queries.....................................................................
-  updateEndEvaluations(evaluation, fn) {
-    database.transaction(function(tx) {
-      tx.executeSql(
-        queryUpdateEndEvaluations,
-        [
-          evaluation.OrdinalEvaluationValueID,
-          evaluation.RevEvaluationValueID,
-          evaluation.ExtraEvaluationValueID,
-          evaluation.FinalEvaluationID,
-          evaluation.Updated,
-          evaluation.GroupPlanningID,
-          evaluation.StudentID
-        ],
-        function(tx, results) {
-          fn();
+  updateEndEvaluations(evaluations, fn) {
+    var count = 0;
+    evaluations.forEach((element, index) => {
+      database.transaction(
+        function(tx) {
+          tx.executeSql(queryUpdateEndEvaluations, [
+            element.OrdinalEvaluationValueID,
+            element.RevEvaluationValueID,
+            element.ExtraEvaluationValueID,
+            element.FinalEvaluationID,
+            element.Updated,
+            element.GroupPlanningID,
+            element.StudentID
+          ]);
+          count++;
+        },
+        this.txError,
+        function() {
+          if (count === evaluations.length) {
+            fn();
+          }
         }
       );
     });
   },
-  updateEvaluativeCut(cut) {
-    database.transaction(function(tx) {
-      tx.executeSql(queryUpdateEvaluativeCuts, [
-        cut.CualitativeEvaluation1,
-        cut.CualitativeEvaluation2,
-        cut.GroupPlanningID,
-        cut.StudentID
-      ]);
+  updateEvaluativeCut(cuts, fn) {
+    var count = 0;
+    cuts.forEach((element, index) => {
+      database.transaction(
+        function(tx) {
+          tx.executeSql(queryUpdateEvaluativeCuts, [
+            element.CualitativeEvaluation1,
+            element.CualitativeEvaluation2,
+            element.GroupPlanningID,
+            element.StudentID
+          ]);
+          count++;
+        },
+        this.txError,
+        function() {
+          if (count === cuts.length) {
+            fn();
+          }
+        }
+      );
     });
   },
   updateAssist(assist, fn) {

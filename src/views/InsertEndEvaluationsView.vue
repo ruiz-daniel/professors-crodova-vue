@@ -69,7 +69,7 @@ export default {
   methods: {
     registerEvaluations() {
       var toast = this.$toast;
-      var evaluations = this.evaluations;
+      var evaluationsForUpdate = [];
       this.evaluations.forEach((element, index) => {
         if (
           element.OrdinalEvaluationValueID !==
@@ -80,37 +80,37 @@ export default {
             this.evaluationsOld[index].ExtraEvaluationValueID ||
           element.FinalEvaluationID !==
             this.evaluationsOld[index].FinalEvaluationID
-        )
-          this.$root.Database.updateEndEvaluations(
-            {
-              GroupPlanningID: element.GroupPlanningID,
-              StudentID: element.StudentID,
-              OrdinalEvaluationValueID: this.$store.getters.getEvaluationValueIDFromValue(
-                element.OrdinalEvaluationValueID
-              ),
-              RevEvaluationValueID: this.$store.getters.getEvaluationValueIDFromValue(
-                element.RevEvaluationValueID
-              ),
-              ExtraEvaluationValueID: this.$store.getters.getEvaluationValueIDFromValue(
-                element.ExtraEvaluationValueID
-              ),
-              FinalEvaluationID: this.$store.getters.getEvaluationValueIDFromValue(
-                element.FinalEvaluationID
-              ),
-              Updated: false
-            },
-            function() {
-              if (index === evaluations.length - 1) {
-                toast.add({
-                  severity: "success",
-                  summary: "Exito",
-                  detail: "Se han actualizado las evaluaciones",
-                  life: 3000
-                });
-              }
-            }
-          );
+        ) {
+          evaluationsForUpdate.push({
+            GroupPlanningID: element.GroupPlanningID,
+            StudentID: element.StudentID,
+            OrdinalEvaluationValueID: this.$store.getters.getEvaluationValueIDFromValue(
+              element.OrdinalEvaluationValueID
+            ),
+            RevEvaluationValueID: this.$store.getters.getEvaluationValueIDFromValue(
+              element.RevEvaluationValueID
+            ),
+            ExtraEvaluationValueID: this.$store.getters.getEvaluationValueIDFromValue(
+              element.ExtraEvaluationValueID
+            ),
+            FinalEvaluationID: this.$store.getters.getEvaluationValueIDFromValue(
+              element.FinalEvaluationID
+            ),
+            Updated: false
+          });
+        }
       });
+      this.$root.Database.updateEndEvaluations(
+        evaluationsForUpdate,
+        function() {
+          toast.add({
+            severity: "success",
+            summary: "Éxito",
+            detail: "Se han actualizado las evaluaciones",
+            life: 3000
+          });
+        }
+      );
     },
     getEvaluations() {
       this.evaluations = this.$store.state.info;

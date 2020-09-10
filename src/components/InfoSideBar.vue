@@ -168,8 +168,8 @@ export default {
         function() {
           toast.add({
             severity: "success",
-            summary: "Exito",
-            detail: "Se ha actualizado con exito",
+            summary: "Éxito",
+            detail: "Se ha actualizado el registro de asistencia",
             life: 7000
           });
         }
@@ -189,8 +189,8 @@ export default {
         function() {
           toast.add({
             severity: "success",
-            summary: "Exito",
-            detail: "Se ha actualizado con exito",
+            summary: "Éxito",
+            detail: "Se ha actualizado la evaluación",
             life: 7000
           });
         }
