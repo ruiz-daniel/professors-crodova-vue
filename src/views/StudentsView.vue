@@ -1,10 +1,11 @@
 <template>
   <div>
-    <DataTable :value="this.$store.state.students">
+    <DataTable :value="this.$store.state.students" :paginator="true" :rows="5">
       <template #header>
-        <h4>{{$store.state.subjectName}} Grupo {{$store.state.groupName}}</h4>
-        <h4>Estudiantes</h4>
-         
+        <h3>
+          {{ $store.state.subjectName }} Grupo {{ $store.state.groupName }}
+        </h3>
+        <h3>Estudiantes</h3>
       </template>
       <Column field="Name" header="Nombre">
         <template #body="slotProps">

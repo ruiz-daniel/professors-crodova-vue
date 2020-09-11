@@ -11,7 +11,7 @@
         v-on:click="registerCut()"
       />
     </div>
-    <DataTable :value="cuts">
+    <DataTable :value="cuts" :paginator="true" :rows="5">
       <Column field="student" header="Est.">
         <template #body="slotProps">
           {{ slotProps.data.StudentName }}

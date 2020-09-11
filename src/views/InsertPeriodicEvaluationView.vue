@@ -39,7 +39,7 @@
         v-on:click="registerEvaluation"
       />
     </div>
-    <DataTable :value="this.evaluations">
+    <DataTable :value="this.evaluations" :paginator="true" :rows="5">
       <Column field="student" header="Estudiante">
         <template #body="slotProps">
           {{ slotProps.data.StudentName }}

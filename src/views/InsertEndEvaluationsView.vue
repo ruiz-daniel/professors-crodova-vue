@@ -10,7 +10,7 @@
       />
     </div>
     <div class="p-field">
-      <DataTable :value="evaluations">
+      <DataTable :value="evaluations" :paginator="true" :rows="5">
         <Column field="student" header="Estud.">
           <template #body="slotProps">
             {{ slotProps.data.StudentName }}

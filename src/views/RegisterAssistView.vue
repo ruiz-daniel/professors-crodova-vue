@@ -1,15 +1,33 @@
 <template>
   <div id="p-formgroup-inline">
-    <div class="p-field">
+    <div class="p-grid p-justify-center"></div>
+    <div class="p-col-12">
       <h3>Registrar Asistencia</h3>
       <h4>{{ $store.state.subjectName }} Grupo {{ $store.state.groupName }}</h4>
-      <Calendar placeholder="Fecha" v-model="date" dateFormat="dd/mm/yy" />
-      <Dropdown
-        v-model="activity_type"
-        :options="getActivityTypesNames()"
-        placeholder="Tipo de Actividad"
-      />
-      <Dropdown v-model="week" :options="listWeeks()" placeholder="Semana" />
+    </div>
+    <div class="p-grid">
+      <div class="p-col-6">
+        <Calendar
+          placeholder="Fecha"
+          v-model="date"
+          dateFormat="dd/mm/yy"
+          style="width:200px; padding-right:20px"
+        />
+        <Dropdown
+          v-model="activity_type"
+          :options="getActivityTypesNames()"
+          placeholder="Actividad"
+          style="margin-top:1rem; width:180px"
+        />
+      </div>
+      <div class="p-col-6">
+        <Dropdown
+          v-model="week"
+          :options="listWeeks()"
+          placeholder="Semana"
+          style="margin-top:1rem"
+        />
+      </div>
     </div>
     <div class="p-field">
       <Button
@@ -19,7 +37,7 @@
       />
     </div>
     <div>
-      <DataTable :value="assists">
+      <DataTable :value="assists" :paginator="true" :rows="5">
         <Column field="student" header="Estudiante">
           <template #body="slotProps">
             {{ slotProps.data.StudentName }}
@@ -138,9 +156,6 @@ export default {
   width: 100%;
   align-self: center;
   margin-top: 1rem;
-}
-.p-dropdown {
-  margin-left: 0.5rem;
 }
 .p-button {
   margin-right: 0.5rem;
