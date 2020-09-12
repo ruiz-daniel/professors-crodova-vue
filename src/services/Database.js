@@ -23,7 +23,7 @@ const querySelectGroup =
   "JOIN subject ON subject.subject_id = group_planning.subject_fk " +
   "WHERE group_planning_id = ?";
 
-const queryTeacherData = "SELECT teacher_name, teacher_id FROM teacher_data";
+const queryTeacherData = "SELECT * FROM teacher_data";
 
 const queryAssistFromStudentAndSubject =
   "SELECT DISTINCT assist_week, assist_date, activity_type_name, assist_first_turn, assist_second_turn, assist_id, assist_activity_type_fk, assist_updated " +
@@ -211,7 +211,7 @@ export default {
         "end_evaluation_student_id, end_evaluation_student_name, end_evaluation_list_number, end_evaluation_subject_fk, end_evaluation_group_fk," +
         "matriculated_subject_id, matriculated_subject_situation_id, ordinal_exam_evaluation_value_id," +
         "rev_exam_evaluation_value_id, extra_exam_evaluation_value_id," +
-        "final_evaluation_id, ordinal_evaluation_id, rev_evaluation_id, extra_evaluation_id, end_evaluation_updated)"
+        "final_evaluation_id, ordinal_evaluation_id, rev_evaluation_id, extra_evaluation_id, set_evaluation_available, end_evaluation_updated)"
     );
     tx.executeSql(
       "CREATE TABLE IF NOT EXISTS periodic_evaluation (periodic_evaluation_id, periodic_evaluation_type_fk," +
@@ -463,7 +463,7 @@ export default {
               "end_evaluation_student_id, end_evaluation_student_name, end_evaluation_list_number, end_evaluation_subject_fk, end_evaluation_group_fk," +
               "matriculated_subject_id, matriculated_subject_situation_id, ordinal_exam_evaluation_value_id," +
               "rev_exam_evaluation_value_id, extra_exam_evaluation_value_id," +
-              "final_evaluation_id, ordinal_evaluation_id, rev_evaluation_id, extra_evaluation_id, end_evaluation_updated) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ",
+              "final_evaluation_id, ordinal_evaluation_id, rev_evaluation_id, extra_evaluation_id, set_evaluation_available, end_evaluation_updated) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ",
             [
               element.groupPlanningID,
               element.ID_Acta1,
@@ -483,6 +483,7 @@ export default {
               element.Ordinal_Evaluation_ID,
               element.Rev_Evaluation_ID,
               element.Extra_Evaluation_ID,
+              element.Set_Evaluation_Available,
               element.Updated
             ]
           );
@@ -777,7 +778,8 @@ export default {
                 .rev_exam_evaluation_value_id,
               ExtraEvaluationValueID: results.rows.item(i)
                 .extra_exam_evaluation_value_id,
-              FinalEvaluationID: results.rows.item(i).final_evaluation_id
+              FinalEvaluationID: results.rows.item(i).final_evaluation_id,
+              SetEvaluationAvailable: results.rows.item(i).set_evaluation_available
             });
           }
           fn(evaluations);

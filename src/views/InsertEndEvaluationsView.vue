@@ -22,6 +22,7 @@
               v-model="slotProps.data.OrdinalEvaluationValueID"
               :options="evaluationValues"
               placeholder="Ev"
+              :disabled="slotProps.data.SetEvaluationAvailable === 'false'"
             />
           </template>
         </Column>

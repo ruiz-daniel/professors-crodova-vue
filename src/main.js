@@ -276,6 +276,7 @@ new Vue({
             Ordinal_Evaluation_ID: element.Ordinal_Evaluation_ID,
             Rev_Evaluation_ID: element.Rev_Evaluation_ID,
             Extra_Evaluation_ID: element.Extra_Evaluation_ID,
+            Set_Evaluation_Available: elementEvaluation.Set_Evaluation_Available,
             Updated: true
           });
         });
