@@ -19,30 +19,7 @@ export default {
     return {
       items: [
         {
-          label: "Planificaciones",
-          icon: "pi pi-list",
-          command: () => {
-            var store = this.$store;
-            var router = this.$router;
-            this.$root.Database.getPlanifications(function(planifications) {
-              store.commit("PLANIFICATIONS", planifications);
-              store.commit("STATE_ACTION", "nothingSelected");
-              router.push("/planifications");
-            });
-            this.$root.sideMenuVisible = false;
-          }
-        },
-        {
-          label: "Tareas",
-          icon: "pi pi-list",
-          command: () => {
-            this.$store.commit("STATE_ACTION", "nothingSelected");
-            this.$router.push({ name: "Tasks" });
-            this.$root.sideMenuVisible = false;
-          }
-        },
-        {
-          label: "Actualizar Datos",
+          label: "Actualizar Planificaciones",
           items: [
             {
               label: "Juego de Datos de Prueba",
@@ -74,7 +51,7 @@ export default {
           ]
         },
         {
-          label: "Sincronizar datos con el servidor",
+          label: "Sincronizar cambios",
           icon: "pi pi-upload",
           command: () => {
             this.$root.updateToServer();
@@ -96,7 +73,7 @@ export default {
 
 <style scoped>
 #sidebar-header {
-  background-color: #333;
+  background-color: #000099;
 }
 h3 {
   margin-bottom: 10%;

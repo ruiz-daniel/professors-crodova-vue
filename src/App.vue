@@ -94,7 +94,6 @@ export default {
   background-color: white;
   color: black;
   border-style: double;
-  
 }
 .p-card-title {
   color: black;

@@ -35,6 +35,7 @@ import Calendar from "primevue/calendar";
 import APICalls from "./services/APICalls";
 import Message from "primevue/message";
 import ProgressBar from "primevue/progressbar";
+import AutoComplete from "primevue/autocomplete";
 Vue.component("Sidebar", Sidebar);
 Vue.component("PanelMenu", PanelMenu);
 Vue.component("Card", Card);
@@ -54,6 +55,7 @@ Vue.component("InputText", InputText);
 Vue.component("Calendar", Calendar);
 Vue.component("Message", Message);
 Vue.component("ProgressBar", ProgressBar);
+Vue.component("AutoComplete", AutoComplete);
 
 Vue.prototype.$http = axios;
 Vue.use(APICalls);
@@ -74,7 +76,7 @@ new Vue({
       inserted: 0,
       updated: 0,
       loadingRequest: false,
-      configUserForServer: false,
+      configUserForServer: false, // flag to know when the user has been sent to configuration view from attempting to connect to the server without setting credentials
       connectionFailed: function() {
         alert("Conexión fallida");
       },
@@ -276,7 +278,8 @@ new Vue({
             Ordinal_Evaluation_ID: element.Ordinal_Evaluation_ID,
             Rev_Evaluation_ID: element.Rev_Evaluation_ID,
             Extra_Evaluation_ID: element.Extra_Evaluation_ID,
-            Set_Evaluation_Available: elementEvaluation.Set_Evaluation_Available,
+            Set_Evaluation_Available:
+              elementEvaluation.Set_Evaluation_Available,
             Updated: true
           });
         });
@@ -321,10 +324,16 @@ new Vue({
     },
 
     updateToServer() {
-      this.updateAssistToServer();
-      this.updateEndEvaluationsToServer();
-      this.updateEvaluativeCutsToServer();
-      this.updatePeriodicEvaluationsToServer();
+      var assist = this.updateAssistToServer;
+      var finals = this.updateEndEvaluationsToServer;
+      var cuts = this.updateEvaluativeCutsToServer;
+      var periodic = this.updatePeriodicEvaluationsToServer;
+      APICalls.updateAllData(this.controlData, function() {
+        assist();
+        finals();
+        cuts();
+        periodic();
+      });
     },
 
     updateAssistToServer() {
@@ -387,18 +396,18 @@ new Vue({
     checkDatabase() {
       var codifiers = this.getCodifiers;
       var control = this.controlData;
-      var toast = this.$toast;
+      var router = this.$router;
       Database.isDatabasePopulated(function(status) {
         if (!status) {
           control.databaseStatusOk = false;
-          toast.add({
-            severity: "error",
-            detail:
-              "Base de Datos Vacía. Conectese al servidor para cargar sus datos",
-            life: 3000
-          });
+          router.push("/");
         } else {
           codifiers();
+          Database.getPlanifications(function(planifications) {
+            store.commit("PLANIFICATIONS", planifications);
+            store.commit("STATE_ACTION", "nothingSelected");
+            router.push({ name: "planifications" });
+          });
         }
       });
     }
@@ -419,7 +428,7 @@ new Vue({
       }
     });
     Database.setToastService(this.$toast);
-    router.push("/");
+    router.push("/blank");
   },
   render: h => h(App)
 }).$mount("#app");

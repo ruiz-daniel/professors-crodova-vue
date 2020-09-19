@@ -2,7 +2,7 @@
 import axios from "axios";
 
 //const AUTH_CREDENTIALS = `${username}:${password}`;
-var baseURL = "http://localhost";
+var baseURL = "localhost";
 var user = "";
 var pass = "";
 
@@ -29,7 +29,7 @@ export default {
     axios
       .request({
         method: "get",
-        url: baseURL + "/sigenu-rest/teachers/getAllData",
+        url: "http://" + baseURL + "/sigenu-rest/teachers/getAllData",
         auth: {
           username: user,
           password: pass
@@ -46,6 +46,27 @@ export default {
       });
   },
 
+  updateAllData(control, fn) {
+    control.loadingRequest = true;
+    axios
+      .request({
+        method: "get",
+        url: "http://" + baseURL + "/sigenu-rest/teachers/test",
+        auth: {
+          username: user,
+          password: pass
+        }
+      })
+      .then(response => {
+        control.loadingRequest = false;
+        fn();
+      })
+      .catch(error => {
+        control.loadingRequest = false;
+        control.connectionFailed();
+      });
+  },
+
   updateAssistToServer(assistsData, index, size, fn) {
     if (index === size) {
       fn();
@@ -55,7 +76,7 @@ export default {
       axios
         .request({
           method: "get",
-          url: baseURL + "/sigenu-rest/teachers/updateAssists",
+          url: "http://" + baseURL + "/sigenu-rest/teachers/updateAssists",
           params: {
             Date: element.Date,
             Week: element.Week,
@@ -88,7 +109,8 @@ export default {
       axios
         .request({
           method: "get",
-          url: baseURL + "/sigenu-rest/teachers/registerEndEvaluation",
+          url:
+            "http://" + baseURL + "/sigenu-rest/teachers/registerEndEvaluation",
           params: {
             Group_ID: element.Group_ID,
             Subject_ID: element.Subject_ID,
@@ -126,7 +148,8 @@ export default {
       axios
         .request({
           method: "get",
-          url: baseURL + "/sigenu-rest/teachers/registerEvaluativeCut",
+          url:
+            "http://" + baseURL + "/sigenu-rest/teachers/registerEvaluativeCut",
           params: {
             GroupPlanning: element.GroupPlanningID,
             Teacher_Name: element.Teacher_name,
@@ -158,7 +181,10 @@ export default {
       axios
         .request({
           method: "get",
-          url: baseURL + "/sigenu-rest/teachers/registerPeriodicEvaluation",
+          url:
+            "http://" +
+            baseURL +
+            "/sigenu-rest/teachers/registerPeriodicEvaluation",
           params: {
             Student_ID: element.Student_ID,
             Evaluation_Value: element.Evaluation_Value,

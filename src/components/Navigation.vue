@@ -11,7 +11,7 @@
         icon="pi pi-home"
         class="p-button-success"
         style="margin-left:5px"
-        v-on:click="$router.push('/')"
+        v-on:click="$root.checkDatabase()"
       />
     </template>
 
@@ -29,7 +29,8 @@
 export default {
   methods: {
     goBack() {
-      return this.$router.go(-1);
+      if (this.$route.path !== "/Planifications" && this.$route.path !== "/")
+        return this.$router.go(-1);
     }
   }
 };

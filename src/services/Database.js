@@ -266,6 +266,7 @@ export default {
           "INSERT INTO login_data (username, password) VALUES (?, ?)",
           [username, password]
         );
+        tx.executeSql("INSERT INTO users (username) VALUES (?)", [username]);
       },
       this.txError,
       function() {
@@ -280,6 +281,22 @@ export default {
         fn(results.rows.item(0).username, results.rows.item(0).password);
       });
     }, this.txError);
+  },
+
+  getUsersList(fn) {
+    var users = [];
+    database.transaction(
+      function(tx) {
+        tx.executeSql("SELECT * FROM users", [], function(tx, results) {
+          console.log("HERE");
+          for (let i = 0; i < results.rows.length; i++) {
+            users.push(results.rows.item(i).username);
+          }
+        });
+      },
+      this.txError,
+      fn(users)
+    );
   },
 
   insertGroups(groupsData, fn) {
@@ -779,7 +796,8 @@ export default {
               ExtraEvaluationValueID: results.rows.item(i)
                 .extra_exam_evaluation_value_id,
               FinalEvaluationID: results.rows.item(i).final_evaluation_id,
-              SetEvaluationAvailable: results.rows.item(i).set_evaluation_available
+              SetEvaluationAvailable: results.rows.item(i)
+                .set_evaluation_available
             });
           }
           fn(evaluations);

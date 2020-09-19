@@ -48,7 +48,8 @@ export default {
       this.$root.APICalls.stateBaseURL(this.serverURL);
       this.$root.APICalls.createHeaders(this.username, this.password);
       this.$root.Database.insertLoginData(this.username, this.password);
-      if (this.$root.controlData.configUserForServer === true){
+      //In case the user is coming to this view after attemting to get data from server without setting credentials
+      if (this.$root.controlData.configUserForServer === true) {
         this.$root.getAllDataFromServer();
         this.$root.controlData.configUserForServer = false;
       }
