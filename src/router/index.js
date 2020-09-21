@@ -1,6 +1,5 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
-import Home from "../views/Home";
 import Planifications from "../views/PlanificationsView";
 import RegisterAssist from "../views/RegisterAssistView";
 import StudentsView from "../views/StudentsView";
@@ -13,11 +12,6 @@ import ConfigurationView from "../views/ConfigurationView";
 Vue.use(VueRouter);
 
 const routes = [
-  {
-    path: "/",
-    name: "home",
-    component: Home
-  },
   {
     path: "/Planifications",
     name: "planifications",

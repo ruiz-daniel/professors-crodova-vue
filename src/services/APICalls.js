@@ -2,7 +2,7 @@
 import axios from "axios";
 
 //const AUTH_CREDENTIALS = `${username}:${password}`;
-var baseURL = "localhost";
+var baseURL = "";
 var user = "";
 var pass = "";
 

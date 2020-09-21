@@ -35,7 +35,6 @@ export default {
                   this.$root.APICalls.getUser() != "" &&
                   this.$root.APICalls.getPass() != ""
                 ) {
-                  this.$router.push("/");
                   this.$root.getAllDataFromServer();
                 } else {
                   this.$toast.add({
@@ -43,7 +42,7 @@ export default {
                     detail: "Configure usuario y contraseña",
                     life: 3000
                   });
-                  this.$root.controlData.configUserForServer = true;
+                  this.$root.controlData.saveLogin = false;
                   this.$router.push({ name: "Configuration" });
                 }
               }
@@ -54,13 +53,28 @@ export default {
           label: "Sincronizar cambios",
           icon: "pi pi-upload",
           command: () => {
-            this.$root.updateToServer();
+            this.$root.sideMenuVisible = false;
+            if (
+              this.$root.APICalls.getUser() != "" &&
+              this.$root.APICalls.getPass() != ""
+            ) {
+              this.$root.updateToServer();
+            } else {
+              this.$toast.add({
+                severity: "error",
+                detail: "Configure usuario y contraseña",
+                life: 3000
+              });
+              this.$root.controlData.saveLogin = true;
+              this.$router.push({ name: "Configuration" });
+            }
           }
         },
         {
           label: "Configuraciones",
           icon: "pi pi-cog",
           command: () => {
+            this.$root.controlData.saveLogin = true;
             this.$router.push({ name: "Configuration" });
             this.$root.sideMenuVisible = false;
           }

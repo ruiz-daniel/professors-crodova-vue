@@ -76,7 +76,7 @@ new Vue({
       inserted: 0,
       updated: 0,
       loadingRequest: false,
-      configUserForServer: false, // flag to know when the user has been sent to configuration view from attempting to connect to the server without setting credentials
+      saveLogin: false, // flag to know when the user is just changing credentials or login into the server
       connectionFailed: function() {
         alert("Conexión fallida");
       },
@@ -400,8 +400,11 @@ new Vue({
       Database.isDatabasePopulated(function(status) {
         if (!status) {
           control.databaseStatusOk = false;
-          router.push("/");
+          control.saveLogin = false;
+          router.push({ name: "Configuration" });
         } else {
+          control.databaseStatusOk = true;
+          control.saveLogin = false;
           codifiers();
           Database.getPlanifications(function(planifications) {
             store.commit("PLANIFICATIONS", planifications);
@@ -415,6 +418,7 @@ new Vue({
 
   mounted() {
     Database.initDatabase();
+    router.push("/blank");
     this.checkDatabase();
     Database.getLoginData(function(username, password) {
       if (
@@ -428,7 +432,6 @@ new Vue({
       }
     });
     Database.setToastService(this.$toast);
-    router.push("/blank");
   },
   render: h => h(App)
 }).$mount("#app");
