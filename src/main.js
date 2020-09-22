@@ -420,7 +420,7 @@ new Vue({
     Database.initDatabase();
     router.push("/blank");
     this.checkDatabase();
-    Database.getLoginData(function(username, password) {
+    Database.getLoginData(function(username, password, domain) {
       if (
         username != "" &&
         username != "undefined" &&
@@ -429,6 +429,7 @@ new Vue({
       ) {
         console.log(username);
         APICalls.createHeaders(username, password);
+        APICalls.stateBaseURL(domain);
       }
     });
     Database.setToastService(this.$toast);

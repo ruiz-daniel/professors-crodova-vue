@@ -71,7 +71,7 @@ export default {
     getDataFromServer() {
       this.$root.APICalls.stateBaseURL(this.host);
       this.$root.APICalls.createHeaders(this.user, this.pass);
-      this.$root.Database.insertLoginData(this.user, this.pass);
+      this.$root.Database.insertLoginData(this.user, this.pass, this.host);
       this.$root.controlData.updated = 0;
       if (this.user != "" && this.pass != "") {
         this.$root.getAllDataFromServer();
@@ -86,7 +86,7 @@ export default {
     saveLoginData() {
       this.$root.APICalls.stateBaseURL(this.host);
       this.$root.APICalls.createHeaders(this.user, this.pass);
-      this.$root.Database.insertLoginData(this.user, this.pass);
+      this.$root.Database.insertLoginData(this.user, this.pass, this.host);
       this.$toast.add({
         severity: "success",
         summary: "Exito",

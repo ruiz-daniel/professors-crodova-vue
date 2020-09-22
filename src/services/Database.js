@@ -188,7 +188,7 @@ export default {
       "CREATE TABLE IF NOT EXISTS teacher_data (teacher_id unique, teacher_name)"
     );
     tx.executeSql(
-      "CREATE TABLE IF NOT EXISTS login_data (username unique, password)"
+      "CREATE TABLE IF NOT EXISTS login_data (username unique, password, domain)"
     );
     tx.executeSql(
       "CREATE TABLE IF NOT EXISTS student_group (group_id unique, group_name unique)"
@@ -259,14 +259,13 @@ export default {
     );
   },
 
-  insertLoginData(username, password) {
+  insertLoginData(username, password, domain) {
     database.transaction(
       function(tx) {
         tx.executeSql(
-          "INSERT INTO login_data (username, password) VALUES (?, ?)",
-          [username, password]
+          "INSERT INTO login_data (username, password, domain) VALUES (?, ?, ?)",
+          [username, password, domain]
         );
-        tx.executeSql("INSERT INTO users (username) VALUES (?)", [username]);
       },
       this.txError,
       function() {
@@ -278,7 +277,11 @@ export default {
   getLoginData(fn) {
     database.transaction(function(tx) {
       tx.executeSql("SELECT * FROM login_data", [], function(tx, results) {
-        fn(results.rows.item(0).username, results.rows.item(0).password);
+        fn(
+          results.rows.item(0).username,
+          results.rows.item(0).password,
+          results.rows.item(0).domain
+        );
       });
     }, this.txError);
   },
