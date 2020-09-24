@@ -21,6 +21,7 @@
           closedEvaluationsInfo.OrdinalClosed = 'true';
           closeExam('01');
         "
+        :disabled="closedEvaluationsInfo.OrdinalClosed === 'true'"
       />
       <Button
         v-if="registerPermitted === 'true'"
@@ -30,6 +31,10 @@
           closedEvaluationsInfo.RevClosed = 'true';
           closeExam('02');
         "
+        :disabled="
+          closedEvaluationsInfo.OrdinalClosed === 'false' ||
+            closedEvaluationsInfo.RevClosed === 'true'
+        "
       />
       <Button
         v-if="registerPermitted === 'true'"
@@ -38,6 +43,10 @@
         v-on:click="
           closedEvaluationsInfo.ExtraClosed = 'true';
           closeExam('03');
+        "
+        :disabled="
+          closedEvaluationsInfo.RevClosed === 'false' ||
+            closedEvaluationsInfo.ExtraClosed === 'true'
         "
       />
     </div>
