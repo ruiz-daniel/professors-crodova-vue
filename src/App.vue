@@ -15,15 +15,19 @@
       >Recibiendo datos del servidor...</Message
     >
     <Message
-      v-if="$root.controlData.updated > 0 && $root.controlData.updated < 4"
+      v-if="$root.loadingUpdate"
       severity="info"
       :sticky="true"
       :closable="false"
       >Enviando datos al servidor...</Message
     >
+    <ProgressBar
+      v-if="$root.loadingUpdate"
+      :value="($root.controlData.updated + 2) * 10"
+    />
 
     <Message
-      v-if="$root.controlData.updated === 4"
+      v-if="$root.controlData.updated === 5"
       severity="warning"
       :sticky="true"
       :closable="false"
@@ -32,7 +36,7 @@
 
     <Button
       label="Actualizar"
-      v-if="$root.controlData.updated === 4"
+      v-if="$root.controlData.updated === 5"
       v-on:click="getDataFromServer()"
     />
 

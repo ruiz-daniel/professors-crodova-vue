@@ -132,7 +132,7 @@
             v-on:click="
               $root.Database.getEndEvaluationsFromPlanification(
                 $store.state.groupPlanningID,
-                function(evaluations) {
+                function(evaluations, closedData) {
                   evaluations.forEach(element => {
                     element.OrdinalEvaluationValueID = $store.getters.getEvaluationValueFromID(
                       element.OrdinalEvaluationValueID
@@ -148,6 +148,7 @@
                     );
                   });
                   $store.commit('SAVE_INFO', evaluations);
+                  $store.commit('SAVE_CLOSED_EVALUATIONS_INFO', closedData);
                   $router.push({ name: 'InsertEndEvaluations' });
                 }
               )

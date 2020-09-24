@@ -35,11 +35,31 @@
         />
         <label for="pass">Contraseña</label>
         <InputText
+          v-if="!showPass"
+          id="pass"
+          type="password"
+          v-model="pass"
+          style="margin-bottom:1rem"
+        />
+        <InputText
+          v-if="showPass"
           id="pass"
           type="text"
           v-model="pass"
           style="margin-bottom:1rem"
         />
+        <label
+          v-if="!showPass"
+          style="font-size:17px;"
+          v-on:click="toggleShowPass"
+          >Mostrar Contraseña</label
+        >
+        <label
+          v-if="showPass"
+          style="font-size:17px;"
+          v-on:click="toggleShowPass"
+          >Ocultar Contraseña</label
+        >
       </div>
       <div class="p-col-12 p-grid p-justify-center">
         <Button
@@ -64,7 +84,8 @@ export default {
     return {
       host: this.$root.APICalls.getBaseURL(),
       user: "",
-      pass: ""
+      pass: "",
+      showPass: false
     };
   },
   methods: {
@@ -93,6 +114,10 @@ export default {
         detail: "Se han guardado las configuraciones",
         life: 3000
       });
+    },
+    toggleShowPass() {
+      if (this.showPass) this.showPass = false;
+      else this.showPass = true;
     }
   }
 };

@@ -223,7 +223,7 @@
             "Second_Last_Name": "Pérez",
             "Assist": [
               {
-                "ID_SIGENU": "Conf115494220000001599931897708",
+                "ID_SIGENU": "Conf115494220000001600891140781",
                 "Date": "Feb 6, 2019 12:00:00 AM",
                 "Week": 1,
                 "Activity_Type": "0.623970375396311",
@@ -760,7 +760,8 @@
               }
             ]
           }
-        ]
+        ],
+        "SetEndEvaluationAvailable": true
       },
       {
         "ID_SIGENU": "0108001442",
@@ -1016,7 +1017,8 @@
             "Assist": [],
             "Periodic_Evaluation": []
           }
-        ]
+        ],
+        "SetEndEvaluationAvailable": true
       }
     ],
     "Subjects": [
@@ -1440,7 +1442,9 @@
           "Matriculated_Subject_Situation_ID": "08"
         }
       ],
-      "Set_Evaluation_Available": true
+      "OrdinalActaClosed": false,
+      "RevActaClosed": false,
+      "ExtraActaClosed": false
     },
     {
       "ID": "-30546575:1735bc2fb10:-7f86",
@@ -1762,7 +1766,9 @@
           "Matriculated_Subject_Situation_ID": "08"
         }
       ],
-      "Set_Evaluation_Available": true
+      "OrdinalActaClosed": false,
+      "RevActaClosed": false,
+      "ExtraActaClosed": false
     }
   ],
   "evaluative_cuts": [

@@ -86,6 +86,9 @@ new Vue({
   computed: {
     loading() {
       return this.controlData.inserted > 0 && this.controlData.inserted < 10;
+    },
+    loadingUpdate() {
+      return this.controlData.updated > 0 && this.controlData.updated < 5;
     }
   },
   methods: {
@@ -254,7 +257,14 @@ new Vue({
     },
     populateDBEndEvaluations(data, control) {
       var evaluationsData = [];
+      var evaluationsClosed = [];
       data.end_evaluations.forEach(elementEvaluation => {
+        evaluationsClosed.push({
+          GroupPlanningID: elementEvaluation.ID,
+          OrdinalClosed: elementEvaluation.OrdinalActaClosed,
+          RevClosed: elementEvaluation.RevActaClosed,
+          ExtraClosed: elementEvaluation.ExtraActaClosed
+        });
         elementEvaluation.evaluations.forEach(element => {
           evaluationsData.push({
             groupPlanningID: elementEvaluation.ID,
@@ -278,12 +288,11 @@ new Vue({
             Ordinal_Evaluation_ID: element.Ordinal_Evaluation_ID,
             Rev_Evaluation_ID: element.Rev_Evaluation_ID,
             Extra_Evaluation_ID: element.Extra_Evaluation_ID,
-            Set_Evaluation_Available:
-              elementEvaluation.Set_Evaluation_Available,
             Updated: true
           });
         });
       });
+      Database.insertEndEvaluationsClosed(evaluationsClosed);
       Database.insertEndEvaluations(evaluationsData, function() {
         control.inserted += 1;
       });
@@ -328,11 +337,27 @@ new Vue({
       var finals = this.updateEndEvaluationsToServer;
       var cuts = this.updateEvaluativeCutsToServer;
       var periodic = this.updatePeriodicEvaluationsToServer;
+      var closed = this.updateClosedEvaluationsToServer;
       APICalls.updateAllData(this.controlData, function() {
         assist();
         finals();
         cuts();
         periodic();
+        closed();
+      });
+    },
+
+    updateClosedEvaluationsToServer() {
+      var control = this.controlData;
+      Database.getClosedEvaluationsForUpdate(function(evaluations) {
+        APICalls.updateClosedEvaluationsToServer(
+          evaluations,
+          0,
+          evaluations.length,
+          function() {
+            control.updated++;
+          }
+        );
       });
     },
 

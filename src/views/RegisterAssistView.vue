@@ -37,7 +37,7 @@
       />
     </div>
     <div>
-      <DataTable :value="assists" :paginator="true" :rows="5">
+      <DataTable :value="assists" :paginator="true" :rows="4">
         <Column field="student" header="Estudiante">
           <template #body="slotProps">
             {{ slotProps.data.StudentName }}

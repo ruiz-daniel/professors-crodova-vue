@@ -4,7 +4,7 @@ var toastService;
 //Queries......................................................................................................................................
 //SELECT QUERIES...............................................................................
 const queryPlanifications =
-  "SELECT group_planning_id, subject_name, group_name " +
+  "SELECT group_planning_id, subject_name, group_name, end_evaluation_available " +
   "FROM student_group " +
   "JOIN group_planning ON student_group.group_id = group_planning.group_fk " +
   "JOIN subject ON subject.subject_id = group_planning.subject_fk";
@@ -45,7 +45,7 @@ const queryPeriodicEvaluationsFromStudentAndSubject =
   "WHERE student_id = ? AND subject_id = ? ORDER BY periodic_evaluation_week";
 
 const queryEndEvaluationsFromPlanification =
-  "SELECT * FROM end_evaluation WHERE end_evaluation_group_planning_id = ?";
+  "SELECT * FROM end_evaluation JOIN end_evaluation_closed ON end_evaluation.end_evaluation_group_planning_id = end_evaluation_closed.end_evaluation_closed_group_planning_id WHERE end_evaluation_group_planning_id = ?";
 
 const queryEvaluativeCutsFromGroup =
   "SELECT cut_group_planning_id, cut_first_delivered, cut_second_delivered, student_cut_abscent_hours_cut1, student_cut_abscent_hours_cut2, student_cut_assist_percent, " +
@@ -79,6 +79,9 @@ const queryUpdateCutAssistData =
   "UPDATE student_cut SET student_cut_abscent_hours_cut1 = ?, student_cut_abscent_hours_cut2 = ?, student_cut_assist_percent = ? " +
   "WHERE student_cut_evaluative_cut_fk = ? AND student_cut_student_fk = ?";
 
+const queryCloseEvaluations =
+  "UPDATE end_evaluation_closed SET ordinal_closed = ?, rev_closed = ?, extra_closed = ? WHERE end_evaluation_closed_group_planning_id = ?";
+
 //SELECT BEFORE UPDATE QUERIES..........................................................................................................................................
 const queryAssistForUpdate =
   "SELECT * FROM assist JOIN teacher_data WHERE assist_updated = 'false'";
@@ -102,6 +105,9 @@ const queryPeriodicEvaluationsForUpdate =
 
 const queryEndEvaluationsForUpdate =
   "SELECT * FROM end_evaluation JOIN teacher_data WHERE end_evaluation_updated = 'false'";
+
+const queryClosedEvaluationsForUpdate =
+  "SELECT DISTINCT * FROM end_evaluation_closed_update";
 
 export default {
   setToastService(toast) {
@@ -160,6 +166,8 @@ export default {
         tx.executeSql("DROP TABLE IF EXISTS student");
         tx.executeSql("DROP TABLE IF EXISTS assist");
         tx.executeSql("DROP TABLE IF EXISTS end_evaluation");
+        tx.executeSql("DROP TABLE IF EXISTS end_evaluation_closed");
+        tx.executeSql("DROP TABLE IF EXISTS end_evaluation_closed_update");
         tx.executeSql("DROP TABLE IF EXISTS periodic_evaluation");
         tx.executeSql("DROP TABLE IF EXISTS evaluative_cut");
         tx.executeSql("DROP TABLE IF EXISTS student_cut");
@@ -167,7 +175,6 @@ export default {
         tx.executeSql("DROP TABLE IF EXISTS evaluation_value");
         tx.executeSql("DROP TABLE IF EXISTS cualitative_evaluation");
         tx.executeSql("DROP TABLE IF EXISTS periodic_evaluation_type");
-        tx.executeSql("DROP TABLE IF EXISTS login_data");
       },
       function(err) {
         console.log(err.message);
@@ -194,7 +201,7 @@ export default {
       "CREATE TABLE IF NOT EXISTS student_group (group_id unique, group_name unique)"
     );
     tx.executeSql(
-      "CREATE TABLE IF NOT EXISTS group_planning (group_planning_id unique, group_fk, subject_fk)"
+      "CREATE TABLE IF NOT EXISTS group_planning (group_planning_id unique, group_fk, subject_fk, end_evaluation_available)"
     );
     tx.executeSql(
       "CREATE TABLE IF NOT EXISTS subject (subject_id unique, subject_name, subject_hours)"
@@ -205,6 +212,12 @@ export default {
     tx.executeSql(
       "CREATE TABLE IF NOT EXISTS assist (assist_id, assist_date, assist_week, assist_activity_type_fk, assist_student_fk, assist_group_fk," +
         "assist_teacher_fk, assist_subject_fk, assist_first_turn, assist_second_turn, assist_updated, assist_modified)"
+    );
+    tx.executeSql(
+      "CREATE TABLE IF NOT EXISTS end_evaluation_closed (end_evaluation_closed_group_planning_id unique, ordinal_closed, rev_closed, extra_closed)"
+    );
+    tx.executeSql(
+      "CREATE TABLE IF NOT EXISTS end_evaluation_closed_update (convocatoria, group_id, subject_id)"
     );
     tx.executeSql(
       "CREATE TABLE IF NOT EXISTS end_evaluation (end_evaluation_group_planning_id, examination_acta_ordinal_id, examination_acta_reval_id, examination_acta_extra_id," +
@@ -262,6 +275,7 @@ export default {
   insertLoginData(username, password, domain) {
     database.transaction(
       function(tx) {
+        tx.executeSql("DELETE FROM login_data");
         tx.executeSql(
           "INSERT INTO login_data (username, password, domain) VALUES (?, ?, ?)",
           [username, password, domain]
@@ -358,8 +372,13 @@ export default {
       function(tx) {
         planningData.forEach((element, index) => {
           tx.executeSql(
-            "INSERT INTO group_planning (group_planning_id, group_fk, subject_fk) VALUES (?, ?, ?) ",
-            [element.GrupoPlanningID, element.ID_SIGENU, element.SubjectID]
+            "INSERT INTO group_planning (group_planning_id, group_fk, subject_fk, end_evaluation_available) VALUES (?, ?, ?, ?) ",
+            [
+              element.GrupoPlanningID,
+              element.ID_SIGENU,
+              element.SubjectID,
+              element.SetEndEvaluationAvailable
+            ]
           );
           if (index === planningData.lenght - 1) {
             fn();
@@ -483,7 +502,7 @@ export default {
               "end_evaluation_student_id, end_evaluation_student_name, end_evaluation_list_number, end_evaluation_subject_fk, end_evaluation_group_fk," +
               "matriculated_subject_id, matriculated_subject_situation_id, ordinal_exam_evaluation_value_id," +
               "rev_exam_evaluation_value_id, extra_exam_evaluation_value_id," +
-              "final_evaluation_id, ordinal_evaluation_id, rev_evaluation_id, extra_evaluation_id, set_evaluation_available, end_evaluation_updated) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ",
+              "final_evaluation_id, ordinal_evaluation_id, rev_evaluation_id, extra_evaluation_id, end_evaluation_updated) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ",
             [
               element.groupPlanningID,
               element.ID_Acta1,
@@ -503,7 +522,6 @@ export default {
               element.Ordinal_Evaluation_ID,
               element.Rev_Evaluation_ID,
               element.Extra_Evaluation_ID,
-              element.Set_Evaluation_Available,
               element.Updated
             ]
           );
@@ -517,6 +535,38 @@ export default {
           }
         }
       );
+    });
+  },
+
+  insertEndEvaluationsClosed(closedData) {
+    var count = 0;
+    closedData.forEach((element, index) => {
+      database.transaction(
+        function(tx) {
+          tx.executeSql(
+            "INSERT INTO end_evaluation_closed (end_evaluation_closed_group_planning_id, ordinal_closed, rev_closed, extra_closed) VALUES (?,?,?,?)",
+            [
+              element.GroupPlanningID,
+              element.OrdinalClosed,
+              element.RevClosed,
+              element.ExtraClosed
+            ]
+          );
+          count++;
+        },
+        this.txError,
+        function() {
+          if (count === closedData.lenght) {
+            console.log("Insertados los datos de las convocatorias");
+          }
+        }
+      );
+    });
+  },
+
+  insertEndEvaluationsClosedUpdate(subject, group, convocatoria) {
+    database.transaction(function(tx) {
+      tx.executeSql("INSERT");
     });
   },
 
@@ -665,7 +715,9 @@ export default {
           planifications.push({
             GroupPlanningID: results.rows.item(i).group_planning_id,
             GroupName: results.rows.item(i).group_name,
-            SubjectName: results.rows.item(i).subject_name
+            SubjectName: results.rows.item(i).subject_name,
+            SetEvaluationAvailable: results.rows.item(i)
+              .end_evaluation_available
           });
         }
         fn(planifications);
@@ -781,11 +833,17 @@ export default {
   },
   getEndEvaluationsFromPlanification(groupPlanningID, fn) {
     var evaluations = [];
+    var closedEvaluations = {};
     database.transaction(function(tx) {
       tx.executeSql(
         queryEndEvaluationsFromPlanification,
         [groupPlanningID],
         function(tx, results) {
+          closedEvaluations = {
+            OrdinalClosed: results.rows.item(0).ordinal_closed,
+            RevClosed: results.rows.item(0).rev_closed,
+            ExtraClosed: results.rows.item(0).extra_closed
+          };
           for (let i = 0; i < results.rows.length; i++) {
             evaluations.push({
               GroupPlanningID: results.rows.item(i)
@@ -798,12 +856,10 @@ export default {
                 .rev_exam_evaluation_value_id,
               ExtraEvaluationValueID: results.rows.item(i)
                 .extra_exam_evaluation_value_id,
-              FinalEvaluationID: results.rows.item(i).final_evaluation_id,
-              SetEvaluationAvailable: results.rows.item(i)
-                .set_evaluation_available
+              FinalEvaluationID: results.rows.item(i).final_evaluation_id
             });
           }
-          fn(evaluations);
+          fn(evaluations, closedEvaluations);
         }
       );
     });
@@ -970,6 +1026,32 @@ export default {
         function(tx, results) {
           fn();
         }
+      );
+    });
+  },
+
+  closeEndEvaluation(data, fn) {
+    database.transaction(function(tx) {
+      tx.executeSql(
+        queryCloseEvaluations,
+        [
+          data.ordinalClosed,
+          data.revClosed,
+          data.extraClosed,
+          data.groupPlanningID
+        ],
+        function(tx, results) {
+          fn();
+        }
+      );
+    });
+  },
+
+  updateClosedEvaluation(groupID, subjectID, convocatoria) {
+    database.transaction(function(tx) {
+      tx.executeSql(
+        "INSERT INTO end_evaluation_closed_update (convocatoria, group_id, subject_id) VALUES (?,?,?)",
+        [convocatoria, groupID, subjectID]
       );
     });
   },
@@ -1195,6 +1277,22 @@ export default {
           evaluations.push(evaluation);
         }
         console.log(evaluations);
+        fn(evaluations);
+      });
+    });
+  },
+
+  getClosedEvaluationsForUpdate(fn) {
+    var evaluations = [];
+    database.transaction(function(tx) {
+      tx.executeSql(queryClosedEvaluationsForUpdate, [], function(tx, results) {
+        for (let i = 0; i < results.rows.length; i++) {
+          evaluations.push({
+            subjectID: results.rows.item(i).subject_id,
+            groupID: results.rows.item(i).group_id,
+            convocatoria: results.rows.item(i).convocatoria
+          });
+        }
         fn(evaluations);
       });
     });

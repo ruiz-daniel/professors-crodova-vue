@@ -24,7 +24,8 @@ export default new Vuex.Store({
     selectedTask: {},
     selectedStudent: {}, //selected student Name for individual student info
     info: {}, // potentially a list of info that should be displayed elsewhere, like a list of assists
-    infoType: {} //specify the type of info thats being shown
+    infoType: {}, //specify the type of info thats being shown
+    closedEvaluationsInfo: {}
   },
   getters: {
     getActivityTypeIDFromName: state => name => {
@@ -52,6 +53,15 @@ export default new Vuex.Store({
       var result = "undefined";
       state.evaluationValues.forEach(element => {
         if (element.Value === value) result = element.ID;
+      });
+      return result;
+    },
+    getEvalPermittedFromPlanning: state => planningID => {
+      var result = "false";
+      state.planifications.forEach(element=>{
+        if (element.GroupPlanningID === planningID){
+          result = element.SetEvaluationAvailable;
+        }
       });
       return result;
     }
@@ -85,6 +95,9 @@ export default new Vuex.Store({
     },
     ADD_INFO(state, newInfo) {
       state.info.push(newInfo);
+    },
+    SAVE_CLOSED_EVALUATIONS_INFO(state, data){
+      state.closedEvaluationsInfo = data;
     },
     STATE_INFO_TYPE(state, type) {
       state.infoType = type;

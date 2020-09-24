@@ -210,5 +210,36 @@ export default {
           );
         });
     }
+  },
+
+  updateClosedEvaluationsToServer(evaluationsdata, index, size, fn) {
+    if (index === size) {
+      fn();
+      return "finished";
+    } else {
+      var element = evaluationsdata[index];
+      axios
+        .request({
+          method: "get",
+          url: "http://" + baseURL + "/sigenu-rest/teachers/closeEndEvaluation",
+          params: {
+            subjectID: element.subjectID,
+            groupID: element.groupID,
+            convocatoria: element.convocatoria
+          },
+          auth: {
+            username: user,
+            password: pass
+          }
+        })
+        .then(response => {
+          this.updatePeriodicEvaluationsToServer(
+            evaluationsdata,
+            index + 1,
+            size,
+            fn
+          );
+        });
+    }
   }
 };
