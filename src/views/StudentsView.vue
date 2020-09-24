@@ -67,27 +67,10 @@ export default {
 </script>
 
 <style scoped>
-#list {
-  max-width: 300px;
-  margin: 0 auto;
-}
-.item {
-  max-width: 250px;
-  width: 250px;
-}
-b-button {
-  margin-bottom: 10px;
-}
-b-navbar-nav {
-  align-items: center;
-}
-div {
-  margin: 0 auto;
-}
 .p-button {
   margin-right: 0.5rem;
 }
 .p-datatable {
-  margin-top: 0.5rem;
+  margin-top: 0.3rem;
 }
 </style>

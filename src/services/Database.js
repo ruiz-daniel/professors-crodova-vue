@@ -190,6 +190,7 @@ export default {
     );
     this.createTables();
   },
+  //CREATE THE DATABASE TABLES.................................................................................................................
   queryTables(tx) {
     tx.executeSql(
       "CREATE TABLE IF NOT EXISTS teacher_data (teacher_id unique, teacher_name)"
@@ -254,6 +255,7 @@ export default {
         "periodic_evaluation_type_code, periodic_evaluation_type_priority, periodic_evaluation_type_canceled)"
     );
   },
+  //......................................................................................................................................................................
   insertTeacherData(data, fn) {
     database.transaction(
       function(tx) {
@@ -271,7 +273,7 @@ export default {
       }
     );
   },
-
+// INSERT QUERIES.............................................................................................................................................
   insertLoginData(username, password, domain) {
     database.transaction(
       function(tx) {
@@ -705,7 +707,7 @@ export default {
     );
   },
 
-  //Database Queries...............................................................................................................................................
+  //Database GET Queries...............................................................................................................................................
 
   getPlanifications(fn) {
     database.transaction(function(tx) {
@@ -943,7 +945,7 @@ export default {
       });
     });
   },
-  //Update Queries.....................................................................
+  //UPDATE QUERIES......................................................................................................................................
   updateEndEvaluations(evaluations, fn) {
     var count = 0;
     evaluations.forEach((element, index) => {
@@ -1056,7 +1058,7 @@ export default {
     });
   },
 
-  //Get info for updates on server.........................................
+  //Get info for updates on server..............................................................................................................
 
   getAssistsForUpdate(fn) {
     var assists = [];
@@ -1298,5 +1300,5 @@ export default {
     });
   }
 
-  //......................................................................
+  //............................................................................................................................................
 };

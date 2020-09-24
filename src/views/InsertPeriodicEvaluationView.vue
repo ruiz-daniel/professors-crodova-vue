@@ -171,14 +171,6 @@ export default {
 </script>
 
 <style>
-.p-formgroup-inline {
-  margin-top: 1rem;
-}
-.p-field {
-  width: 100%;
-  align-self: center;
-  margin-top: 1rem;
-}
 .p-button {
   margin-left: 0.3rem;
   margin-right: 0.3rem;

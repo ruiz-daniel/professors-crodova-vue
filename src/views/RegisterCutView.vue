@@ -49,13 +49,9 @@
 export default {
   data() {
     return {
-      selectedStudent: {},
-      cutsOptions: ["01", "02"],
       cuts: {},
       cutsOld: [],
-      selectedCut: {},
       evaluationsOptions: ["B", "R", "M", "NE"],
-      evaluation: {}
     };
   },
   methods: {
@@ -108,12 +104,5 @@ export default {
 <style scoped>
 .p-dropdown {
   max-width: 60px;
-}
-#form {
-  margin: 0 auto;
-  max-width: 300px;
-}
-#save_btn {
-  margin-right: 10px;
 }
 </style>

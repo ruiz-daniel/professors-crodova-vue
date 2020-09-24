@@ -236,12 +236,4 @@ export default {
 .p-dropdown {
   max-width: 50px;
 }
-.p-formgroup-inline {
-  margin-top: 1rem;
-}
-.p-field {
-  width: 100%;
-  align-self: center;
-  margin-top: 1rem;
-}
 </style>

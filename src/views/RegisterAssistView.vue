@@ -145,18 +145,6 @@ export default {
 </script>
 
 <style scoped>
-#form {
-  margin: 0 auto;
-  max-width: 300px;
-}
-.p-formgroup-inline {
-  margin-top: 1rem;
-}
-.p-field {
-  width: 100%;
-  align-self: center;
-  margin-top: 1rem;
-}
 .p-button {
   margin-right: 0.5rem;
 }

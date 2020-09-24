@@ -6,9 +6,16 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
+    //TEACHER DATA............................................................................
     teacher_name: {},
     teacher_id: {},
+    //PLANIFICATIONS AND STATIC CODIFIERS.....................................................
     planifications: {},
+    activityTypes: {},
+    evaluationValues: {},
+    periodicEvaluationTypes: {},
+    cualitativeEvaluations: {},
+    //CURRENT INFO (GROUP, SUBJECT, STUDENTS, ETC)............................................
     groupPlanningID: {},
     groupID: {},
     subjectID: {},
@@ -16,16 +23,11 @@ export default new Vuex.Store({
     subjectName: {},
     subjectHours: {},
     students: {},
-    activityTypes: {},
-    evaluationValues: {},
-    periodicEvaluationTypes: {},
-    cualitativeEvaluations: {},
-    action: "nothingSelected", //either selectedGroup or selectedTask, for navigation
-    selectedTask: {},
+    closedEvaluationsInfo: {},
+    //.......................................................................................
     selectedStudent: {}, //selected student Name for individual student info
-    info: {}, // potentially a list of info that should be displayed elsewhere, like a list of assists
-    infoType: {}, //specify the type of info thats being shown
-    closedEvaluationsInfo: {}
+    info: {}, // assist, evaluations, cuts, ethe current info that's being displayed
+    infoType: {} //specify the type of info thats being shown (assists or periodic evaluation)
   },
   getters: {
     getActivityTypeIDFromName: state => name => {
@@ -78,23 +80,14 @@ export default new Vuex.Store({
       state.subjectName = groupData.SubjectName;
       state.subjectHours = groupData.SubjectHours;
     },
-    STATE_ACTION(state, action) {
-      state.action = action;
-    },
     STUDENTS(state, students) {
       state.students = students;
-    },
-    STATE_TASK(state, task) {
-      state.selectedTask = task;
     },
     SELECT_STUDENT(state, student) {
       state.selectedStudent = student;
     },
     SAVE_INFO(state, info) {
       state.info = info;
-    },
-    ADD_INFO(state, newInfo) {
-      state.info.push(newInfo);
     },
     SAVE_CLOSED_EVALUATIONS_INFO(state, data){
       state.closedEvaluationsInfo = data;

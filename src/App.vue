@@ -90,10 +90,6 @@ export default {
   color: #2c3e50;
   /* margin-top: 60px; */
 }
-#container {
-  display: grid;
-  grid-template-columns: auto auto;
-}
 #card {
   background-color: white;
   color: black;

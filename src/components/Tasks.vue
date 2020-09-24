@@ -15,14 +15,6 @@
         </template>
         <template slot="footer">
           <Button
-            v-if="checkSelectedAction() === 'select'"
-            icon="pi pi-arrow-right"
-            label="Seleccionar Grupo"
-            class="p-button-primary"
-            v-on:click="selectTask('asistencia')"
-          />
-          <Button
-            v-if="checkSelectedAction() === 'accept'"
             icon="pi pi-check"
             label="Seleccionar Tarea"
             class="p-button-primary"
@@ -47,14 +39,6 @@
         </template>
         <template slot="footer">
           <Button
-            v-if="checkSelectedAction() === 'select'"
-            icon="pi pi-arrow-right"
-            label="Seleccionar Grupo"
-            class="p-button-primary"
-            v-on:click="selectTask('cortes')"
-          />
-          <Button
-            v-if="checkSelectedAction() === 'accept'"
             icon="pi pi-check"
             label="Seleccionar Tarea"
             class="p-button-primary"
@@ -86,14 +70,6 @@
         </template>
         <template slot="footer">
           <Button
-            v-if="checkSelectedAction() === 'select'"
-            icon="pi pi-arrow-right"
-            label="Seleccionar Grupo"
-            class="p-button-primary"
-            v-on:click="selectTask('periodicas')"
-          />
-          <Button
-            v-if="checkSelectedAction() === 'accept'"
             icon="pi pi-check"
             label="Seleccionar Tarea"
             class="p-button-primary"
@@ -118,14 +94,6 @@
         </template>
         <template slot="footer">
           <Button
-            v-if="checkSelectedAction() === 'select'"
-            icon="pi pi-arrow-right"
-            label="Seleccionar Grupo"
-            class="p-button-primary"
-            v-on:click="selectTask('finales')"
-          />
-          <Button
-            v-if="checkSelectedAction() === 'accept'"
             icon="pi pi-check"
             label="Seleccionar Tarea"
             class="p-button-primary"
@@ -162,21 +130,7 @@
 
 <script>
 export default {
-  methods: {
-    selectTask(task) {
-      this.$store.commit("STATE_TASK", task);
-      this.$store.commit("STATE_ACTION", "selectedTask");
-      this.$router.push("/planifications");
-    },
-    checkSelectedAction() {
-      var selectedAction = this.$store.state.action;
-      if (selectedAction === "selectedGroup") {
-        return "accept";
-      } else {
-        return "select";
-      }
-    }
-  }
+  methods: {}
 };
 </script>
 

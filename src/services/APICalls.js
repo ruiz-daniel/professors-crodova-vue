@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-vars */
 import axios from "axios";
 
-//const AUTH_CREDENTIALS = `${username}:${password}`;
 var baseURL = "";
 var user = "";
 var pass = "";

@@ -1,5 +1,5 @@
 <template>
-  <div id="vue-app">
+  <div class="p-grid p-col-12 p-justify-center">
     <Carousel
       :value="groups"
       :numVisible="3"
@@ -25,25 +25,16 @@
 
               <div class="group-buttons">
                 <Button
-                  v-if="checkCurrentAction() === 'select'"
                   icon="pi pi-list"
                   class="p-button-secondary"
                   label="Estudiantes"
                   v-on:click="setStudents(slotProps.data.GroupPlanningID)"
                 />
                 <Button
-                  v-if="checkCurrentAction() === 'select'"
                   icon="pi pi-pencil"
                   class="p-button-secondary"
                   label="Registrar"
                   v-on:click="goToTasks(slotProps.data.GroupPlanningID)"
-                />
-                <Button
-                  v-if="checkCurrentAction() === 'accept'"
-                  icon="pi pi-check"
-                  class="p-button-secondary"
-                  label="Seleccionar"
-                  v-on:click="goToSelectedTask(slotProps.data.GroupPlanningID)"
                 />
               </div>
             </div>
@@ -105,67 +96,7 @@ export default {
       );
       this.$root.Database.selectGroup(groupPlanningID, function(groupData) {
         store.commit("SELECT_GROUP", groupData);
-        store.commit("STATE_ACTION", "selectedGroup");
         router.push({ name: "Tasks" });
-      });
-    },
-    checkCurrentAction() {
-      if (
-        this.$store.state.action === "nothingSelected" ||
-        this.$store.state.action === "selectedGroup"
-      ) {
-        return "select";
-      } else if (this.$store.state.action === "selectedTask") {
-        return "accept";
-      }
-    },
-    goToSelectedTask(groupPlanningID) {
-      var store = this.$store;
-      var router = this.$router;
-      var root = this.$root;
-      this.$root.Database.getStudentsFromPlanification(
-        groupPlanningID,
-        function(students) {
-          store.commit("STUDENTS", students);
-        }
-      );
-      this.$root.Database.selectGroup(groupPlanningID, function(groupData) {
-        store.commit("SELECT_GROUP", groupData);
-        var selectedTask = store.state.selectedTask;
-        if (selectedTask === "asistencia") {
-          router.push({ name: "RegisterAssist" });
-        } else if (selectedTask === "cortes") {
-          root.Database.getEvaluativeCutsFromGroup(groupPlanningID, function(
-            cuts
-          ) {
-            store.commit("SAVE_INFO", cuts);
-            router.push({ name: "RegisterCut" });
-          });
-        } else if (selectedTask === "periodicas") {
-          router.push({ name: "InsertPeriodicEvaluation" });
-        } else if (selectedTask === "finales") {
-          root.Database.getEndEvaluationsFromPlanification(
-            groupPlanningID,
-            function(evaluations) {
-              evaluations.forEach(element => {
-                element.OrdinalEvaluationValueID = store.getters.getEvaluationValueFromID(
-                  element.OrdinalEvaluationValueID
-                );
-                element.RevEvaluationValueID = store.getters.getEvaluationValueFromID(
-                  element.RevEvaluationValueID
-                );
-                element.ExtraEvaluationValueID = store.getters.getEvaluationValueFromID(
-                  element.ExtraEvaluationValueID
-                );
-                element.FinalEvaluationID = store.getters.getEvaluationValueFromID(
-                  element.FinalEvaluationID
-                );
-              });
-              store.commit("SAVE_INFO", evaluations);
-              router.push({ name: "InsertEndEvaluations" });
-            }
-          );
-        }
       });
     }
   }
@@ -173,10 +104,6 @@ export default {
 </script>
 
 <style scoped>
-#list {
-  max-width: 300px;
-  margin: 0 auto;
-}
 .group-content {
   border: 1px solid var(--layer-2);
   border-radius: 3px;
@@ -184,17 +111,14 @@ export default {
   text-align: center;
   padding: 2em 0 2.25em 0;
 }
-
 .group-title {
   font-weight: 600;
   font-size: 20px;
   margin-top: 24px;
 }
-
 .group-subtitle {
   margin: 0.25em 0 2em 0;
 }
-
 button {
   margin-left: 0.5rem;
   margin-bottom: 0.5rem;

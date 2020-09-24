@@ -1,6 +1,6 @@
 <template>
   <div class="p-grid p-justify-center" style="margin-top:1rem">
-    <div class="p-col-8 p-lg-7 pxl-7">
+    <div class="p-col-8 p-lg-7 p-xl-7">
       <Button
         v-if="$root.controlData.inserted >= 10"
         label="Ver Planificaciones"

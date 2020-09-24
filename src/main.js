@@ -15,6 +15,9 @@ import "primeflex/primeflex.css";
 import ToastService from "primevue/toastservice";
 Vue.use(ToastService);
 
+/*PRIMEVUE COMPONENTS......................................................
+/
+*/
 import Sidebar from "primevue/sidebar";
 import PanelMenu from "primevue/panelmenu";
 import Card from "primevue/card";
@@ -56,7 +59,7 @@ Vue.component("Calendar", Calendar);
 Vue.component("Message", Message);
 Vue.component("ProgressBar", ProgressBar);
 Vue.component("AutoComplete", AutoComplete);
-
+//....................................................................................
 Vue.prototype.$http = axios;
 Vue.use(APICalls);
 
@@ -66,17 +69,21 @@ new Vue({
   router,
   store,
   data: {
-    //local variables...............................
+    //LOCAL VARIABLES...................................................................
     Database,
     APICalls,
     fileData,
-    sideMenuVisible: false,
-    sideInfoVisible: false,
+    sideMenuVisible: false, // controls when the left sidebar is visible
+    sideInfoVisible: false, // controls when the right side bar is visible
     controlData: {
-      inserted: 0,
-      updated: 0,
-      loadingRequest: false,
+      inserted: 0, //data succesfully inserted in the database when downloading planifications(for progress bar and flow control)
+
+      updated: 0, //data succesfully uploaded to the server (for progress bar and flow control)
+
+      loadingRequest: false, //state in which the app is connecting to the server
+
       saveLogin: false, // flag to know when the user is just changing credentials or login into the server
+
       connectionFailed: function() {
         alert("Conexión fallida");
       },
@@ -92,34 +99,12 @@ new Vue({
     }
   },
   methods: {
-    saveResponseToLocalFile(filename, jsonData) {
-      let blob = new Blob([jsonData], {
-        type: "text/plain;charset=utf-8;"
-      });
-      if (navigator.msSaveBlob) {
-        // IE 10+
-        navigator.msSaveBlob(blob, filename);
-      } else {
-        let link = document.createElement("a");
-        if (link.download !== undefined) {
-          // feature detection
-          // Browsers that support HTML5 download attribute
-          let url = URL.createObjectURL(blob);
-          link.setAttribute("href", url);
-          link.setAttribute("download", filename);
-          link.style.visibility = "hidden";
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-        }
-      }
-    },
-    updateAll() {
-      router.push("/");
-      //Test the server and ask for all the update functions
-    },
-    //Populate Database Functions................................................................
+    //POPULATE DATABASE METHODS............................................................................
     populateDB(data) {
+      /*Call all the populate database functions
+      // Each time one finishes upgrades the inserted counter by 1 until 10
+      // Data must follow certain structure. If someone is altered in the ejb so should be here
+      */
       var control = this.controlData;
       control.inserted = 0;
       Database.resetDatabase();
@@ -142,6 +127,7 @@ new Vue({
       this.populateDBEvaluativeCuts(data, control);
       this.populateDBCodifiers(data, control);
     },
+
     populateDBCodifiers(data, control) {
       Database.insertCodifiers(
         data.codifiers.Activity_Type,
@@ -326,13 +312,17 @@ new Vue({
         control.inserted += 1;
       });
     },
-    //............................................................................................
+    //................................................................................................
 
     getAllDataFromServer() {
       APICalls.getAllData(this.controlData, this.populateDB);
     },
 
+    //UPDATE TO SERVER METHODS........................................................................
     updateToServer() {
+      /*Call all the update methods
+      //Each time one finishes increases the updated counter by 1 until 5
+      */
       var assist = this.updateAssistToServer;
       var finals = this.updateEndEvaluationsToServer;
       var cuts = this.updateEvaluativeCutsToServer;
@@ -403,6 +393,8 @@ new Vue({
         );
       });
     },
+    //..........................................................................................
+
     getCodifiers() {
       Database.getTeacherData(function(data) {
         store.commit("SET_TEACHER_DATA", data);
@@ -419,6 +411,10 @@ new Vue({
     },
 
     checkDatabase() {
+      /*Check if database has planifications
+      //If it does send the user to the planifications view
+      //If it doesn't send them to the configuration view for user and password
+      */
       var codifiers = this.getCodifiers;
       var control = this.controlData;
       var router = this.$router;
@@ -443,7 +439,7 @@ new Vue({
 
   mounted() {
     Database.initDatabase();
-    router.push("/blank");
+    router.push("/blank"); //To avoid double navigation from the checkdatabase method
     this.checkDatabase();
     Database.getLoginData(function(username, password, domain) {
       if (

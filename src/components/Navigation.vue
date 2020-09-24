@@ -36,27 +36,4 @@ export default {
 };
 </script>
 
-<style scoped>
-b-navbar {
-  margin-bottom: 30px;
-}
-#nav {
-  display: flex;
-  align-items: center;
-  flex-direction: row;
-  margin: 0 auto;
-}
-#nav {
-  padding: 30px;
-}
-
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
-  /* margin-right: 20px; */
-}
-
-#nav a.router-link-exact-active {
-  color: #42b983;
-}
-</style>
+<style scoped></style>
