@@ -5,7 +5,7 @@
         v-if="$root.controlData.inserted >= 10"
         label="Ver Planificaciones"
         v-on:click="
-          $router.push({ name: 'planifications' });
+          goToPlanifications();
           $root.controlData.inserted = 0;
         "
       />
@@ -118,6 +118,14 @@ export default {
     toggleShowPass() {
       if (this.showPass) this.showPass = false;
       else this.showPass = true;
+    },
+    goToPlanifications() {
+      var store = this.$store;
+      var router = this.$router;
+      this.$root.Database.getPlanifications(function(planifications) {
+        store.commit("PLANIFICATIONS", planifications);
+        router.push({ name: "planifications" });
+      });
     }
   }
 };
