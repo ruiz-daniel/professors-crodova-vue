@@ -429,7 +429,6 @@ new Vue({
           codifiers();
           Database.getPlanifications(function(planifications) {
             store.commit("PLANIFICATIONS", planifications);
-            store.commit("STATE_ACTION", "nothingSelected");
             router.push({ name: "planifications" });
           });
         }
