@@ -1,5 +1,5 @@
 <template>
-  <div class="p-grid p-col-12 p-justify-center">
+  <div class="p-col-12 p-justify-center">
     <Carousel
       :value="groups"
       :numVisible="3"
