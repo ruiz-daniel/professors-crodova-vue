@@ -4,7 +4,7 @@ var toastService;
 //Queries......................................................................................................................................
 //SELECT QUERIES...............................................................................
 const queryPlanifications =
-  "SELECT group_planning_id, subject_name, group_name, end_evaluation_available " +
+  "SELECT group_planning_id, subject_name, group_name, end_evaluation_available, course_type_name " +
   "FROM student_group " +
   "JOIN group_planning ON student_group.group_id = group_planning.group_fk " +
   "JOIN subject ON subject.subject_id = group_planning.subject_fk";
@@ -202,7 +202,7 @@ export default {
       "CREATE TABLE IF NOT EXISTS student_group (group_id unique, group_name unique)"
     );
     tx.executeSql(
-      "CREATE TABLE IF NOT EXISTS group_planning (group_planning_id unique, group_fk, subject_fk, end_evaluation_available)"
+      "CREATE TABLE IF NOT EXISTS group_planning (group_planning_id unique, group_fk, subject_fk, end_evaluation_available, course_type_name)"
     );
     tx.executeSql(
       "CREATE TABLE IF NOT EXISTS subject (subject_id unique, subject_name, subject_hours)"
@@ -374,12 +374,13 @@ export default {
       function(tx) {
         planningData.forEach((element, index) => {
           tx.executeSql(
-            "INSERT INTO group_planning (group_planning_id, group_fk, subject_fk, end_evaluation_available) VALUES (?, ?, ?, ?) ",
+            "INSERT INTO group_planning (group_planning_id, group_fk, subject_fk, end_evaluation_available, course_type_name) VALUES (?, ?, ?, ?, ?) ",
             [
               element.GrupoPlanningID,
               element.ID_SIGENU,
               element.SubjectID,
-              element.SetEndEvaluationAvailable
+              element.SetEndEvaluationAvailable,
+              element.CourseTypeName
             ]
           );
           if (index === planningData.lenght - 1) {
@@ -719,7 +720,8 @@ export default {
             GroupName: results.rows.item(i).group_name,
             SubjectName: results.rows.item(i).subject_name,
             SetEvaluationAvailable: results.rows.item(i)
-              .end_evaluation_available
+              .end_evaluation_available,
+            CourseTypeName: results.rows.item(i).course_type_name
           });
         }
         fn(planifications);
