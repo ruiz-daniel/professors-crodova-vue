@@ -32,7 +32,12 @@ const queryAssistFromStudentAndSubject =
   "JOIN subject ON subject.subject_id = assist.assist_subject_fk " +
   "JOIN activity_type ON activity_type.activity_type_id = assist.assist_activity_type_fk " +
   "WHERE student_id = ? AND subject_id = ? ORDER BY assist_week";
-
+const queryAssistFromGroupAndDate =
+  "SELECT student_id, student_name, assist_first_turn, assist_second_turn, assist_updated, assist_date " +
+  "FROM assist " +
+  "JOIN student " +
+  "ON assist.assist_student_fk = student.student_id " +
+  "WHERE assist.assist_week = ? AND assist.assist_activity_type_fk = ? AND assist.assist_subject_fk = ? AND assist.assist_group_fk = ?";
 const queryPeriodicEvaluationsFromStudentAndSubject =
   "SELECT DISTINCT periodic_evaluation_type_code, periodic_evaluation_id, periodic_evaluation_type_fk," +
   "periodic_evaluation_username, periodic_evaluation_host, periodic_evaluation_canceled, periodic_evaluation_value," +
@@ -273,7 +278,7 @@ export default {
       }
     );
   },
-// INSERT QUERIES.............................................................................................................................................
+  // INSERT QUERIES.............................................................................................................................................
   insertLoginData(username, password, domain) {
     database.transaction(
       function(tx) {
@@ -808,6 +813,36 @@ export default {
       );
     });
   },
+  getAssistRecordFromGroup(week, activityType, subject, group, fn) {
+    var assists = [];
+    database.transaction(function(tx) {
+      tx.executeSql(
+        queryAssistFromGroupAndDate,
+        [week, activityType, subject, group],
+        function(tx, results) {
+          for (let i = 0; i < results.rows.length; i++) {
+            var turn1;
+            var turn2;
+            if (results.rows.item(i).assist_first_turn === "true") turn1 = true;
+            else turn1 = false;
+            if (results.rows.item(i).assist_second_turn === "true")
+              turn2 = true;
+            else turn2 = false;
+            assists.push({
+              Date: results.rows.item(i).assist_date,
+              First_Turn: turn1,
+              Second_Turn: turn2,
+              Updated: results.rows.item(i).assist_updated,
+              Student: results.rows.item(i).student_id,
+              StudentName: results.rows.item(i).student_name
+            });
+          }
+          fn(assists);
+        }
+      );
+    });
+  },
+
   getPeriodicEvaluationsFromStudent(studentID, subjectID, fn) {
     var evaluations = [];
     database.transaction(function(tx) {
@@ -1011,6 +1046,33 @@ export default {
         ],
         function(tx, results) {
           fn();
+        }
+      );
+    });
+  },
+  updateMultipleAssists(assists, fn) {
+    console.log(assists)
+    var count = 0;
+    assists.forEach(element => {
+      database.transaction(
+        function(tx) {
+          tx.executeSql(queryUpdateAssist, [
+            element.FirstTurn,
+            element.SecondTurn,
+            element.Updated,
+            element.Modified,
+            element.StudentID,
+            element.SubjectID,
+            element.Date,
+            element.ActivityType
+          ]);
+          count++;
+        },
+        this.txError,
+        function() {
+          if (count === assists.length) {
+            fn();
+          }
         }
       );
     });

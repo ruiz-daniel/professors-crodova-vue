@@ -223,7 +223,7 @@
             "Second_Last_Name": "Pérez",
             "Assist": [
               {
-                "ID_SIGENU": "Conf115494220000001600891140781",
+                "ID_SIGENU": "Conf115494220000001601015130458",
                 "Date": "Feb 6, 2019 12:00:00 AM",
                 "Week": 1,
                 "Activity_Type": "0.623970375396311",
@@ -761,7 +761,8 @@
             ]
           }
         ],
-        "SetEndEvaluationAvailable": true
+        "SetEndEvaluationAvailable": true,
+        "CourseTypeName": "CRD"
       },
       {
         "ID_SIGENU": "0108001442",
@@ -1018,7 +1019,8 @@
             "Periodic_Evaluation": []
           }
         ],
-        "SetEndEvaluationAvailable": true
+        "SetEndEvaluationAvailable": true,
+        "CourseTypeName": "CRD"
       }
     ],
     "Subjects": [

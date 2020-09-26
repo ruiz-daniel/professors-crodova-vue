@@ -62,6 +62,7 @@ Vue.component("AutoComplete", AutoComplete);
 //....................................................................................
 Vue.prototype.$http = axios;
 Vue.use(APICalls);
+Vue.use(require('vue-moment'));
 
 Vue.config.productionTip = false;
 
