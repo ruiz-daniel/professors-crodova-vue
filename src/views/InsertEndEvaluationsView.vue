@@ -134,6 +134,7 @@ export default {
     registerEvaluations() {
       var toast = this.$toast;
       var evaluationsForUpdate = [];
+      var error = false;
       this.evaluations.forEach((element, index) => {
         if (
           element.OrdinalEvaluationValueID !==
@@ -154,7 +155,8 @@ export default {
                 element.StudentName,
               life: 3000
             });
-            return;
+            error = true;
+            return 0;
           }
           evaluationsForUpdate.push({
             GroupPlanningID: element.GroupPlanningID,
@@ -175,17 +177,19 @@ export default {
           });
         }
       });
-      this.$root.Database.updateEndEvaluations(
-        evaluationsForUpdate,
-        function() {
-          toast.add({
-            severity: "success",
-            summary: "Éxito",
-            detail: "Se han actualizado las evaluaciones",
-            life: 3000
-          });
-        }
-      );
+      if (!error) {
+        this.$root.Database.updateEndEvaluations(
+          evaluationsForUpdate,
+          function() {
+            toast.add({
+              severity: "success",
+              summary: "Éxito",
+              detail: "Se han actualizado las evaluaciones",
+              life: 3000
+            });
+          }
+        );
+      }
     },
     getEvaluations() {
       this.evaluations = this.$store.state.info;
