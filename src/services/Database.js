@@ -927,7 +927,9 @@ export default {
               .student_cut_abscent_hours_cut2,
             AssistPercent: results.rows.item(i).student_cut_assist_percent
           });
+          console.log(results.rows.item(i).student_cut_cualitative_evaluation1)
         }
+        
         fn(cuts);
       });
     });

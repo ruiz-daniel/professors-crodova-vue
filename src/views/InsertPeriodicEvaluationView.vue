@@ -91,12 +91,7 @@ export default {
           Periodic_Evaluation_Type: "",
           Cancelled: false,
           Evaluation_Value: "",
-          Date:
-            this.date.getDate() +
-            "-" +
-            (this.date.getMonth() + 1) +
-            "-" +
-            this.date.getFullYear(),
+          Date: this.date,
           Subject: this.$store.state.subjectID,
           Grupo: this.$store.state.groupID,
           Week: this.week,
@@ -131,12 +126,7 @@ export default {
       if (this.evaluation_type != "" && this.week > 0) {
         this.evaluations.forEach(element => {
           element.Periodic_Evaluation_Type = this.evaluation_type.ID;
-          element.Date =
-            this.date.getDate() +
-            "-" +
-            (this.date.getMonth() + 1) +
-            "-" +
-            this.date.getFullYear();
+          element.Date = this.date;
           element.Week = this.week;
           if (element.Evaluation_Value === "") element.Evaluation_Value = "2";
         });

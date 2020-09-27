@@ -20,6 +20,10 @@
         icon="pi pi-arrow-left"
         style="margin-right: .5em"
         v-on:click="goBack"
+        v-if="
+          this.$route.path !== '/Planifications' &&
+            this.$route.path !== '/Configuration'
+        "
       />
     </template>
   </Toolbar>
@@ -29,7 +33,10 @@
 export default {
   methods: {
     goBack() {
-      if (this.$route.path !== "/Planifications" && this.$route.path !== "/")
+      if (
+        this.$route.path !== "/Planifications" &&
+        this.$route.path !== "/Configuration"
+      )
         return this.$router.go(-1);
     }
   }

@@ -2,7 +2,11 @@
   <div id="app">
     <Navigation />
     <div v-if="$root.loading">
-      <Message severity="info" :sticky="true" :closable="false"
+      <Message
+        severity="info"
+        :sticky="true"
+        :closable="false"
+        v-on:hide="$root.checkDatabase()"
         >Cargando datos...</Message
       >
       <ProgressBar :value="$root.controlData.inserted * 10" />
@@ -65,7 +69,6 @@ export default {
         this.$root.APICalls.getUser() != "" &&
         this.$root.APICalls.getPass() != ""
       ) {
-        this.$router.push("/");
         this.$root.getAllDataFromServer();
       } else {
         this.$toast.add({

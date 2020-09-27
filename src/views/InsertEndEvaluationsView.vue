@@ -145,6 +145,17 @@ export default {
           element.FinalEvaluationID !==
             this.evaluationsOld[index].FinalEvaluationID
         ) {
+          if (element.FinalEvaluationID === "undefined") {
+            toast.add({
+              severity: "error",
+              summary: "Error",
+              detail:
+                "Debe especificar una evaluación final para " +
+                element.StudentName,
+              life: 3000
+            });
+            return;
+          }
           evaluationsForUpdate.push({
             GroupPlanningID: element.GroupPlanningID,
             StudentID: element.StudentID,

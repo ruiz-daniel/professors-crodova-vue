@@ -67,7 +67,7 @@
         </Column>
         <Column field="Date" header="Fecha">
           <template #body="slotProps">
-            {{ slotProps.data.Date }}
+            {{ slotProps.data.Date | moment("DD/MMM/YY") }}
           </template>
         </Column>
         <Column field="Evaluation" header="Nota">
