@@ -154,6 +154,7 @@ export default {
     },
     updateAssist() {
       var toast = this.$toast;
+      var root = this.$root;
       this.$root.Database.updateAssist(
         {
           StudentID: this.editAssist.StudentID,
@@ -166,17 +167,19 @@ export default {
           Modified: true
         },
         function() {
+          root.sideInfoVisible = false;
           toast.add({
             severity: "success",
             summary: "Éxito",
             detail: "Se ha actualizado el registro de asistencia",
-            life: 7000
+            life: 3000
           });
         }
       );
     },
     updateEvaluation() {
       var toast = this.$toast;
+      var root = this.$root;
       this.$root.Database.updatePeriodicEvaluation(
         {
           StudentID: this.editEvaluation.StudentID,
@@ -187,11 +190,12 @@ export default {
           Updated: false
         },
         function() {
+          root.sideInfoVisible = false;
           toast.add({
             severity: "success",
             summary: "Éxito",
             detail: "Se ha actualizado la evaluación",
-            life: 7000
+            life: 3000
           });
         }
       );
