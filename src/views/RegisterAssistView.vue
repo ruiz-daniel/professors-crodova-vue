@@ -22,6 +22,7 @@
           placeholder="Actividad"
           style="margin-top:1rem; width:180px"
           v-on:change="loadAssists()"
+          id="inputActType"
         />
       </div>
       <div class="p-col-6">
@@ -31,6 +32,7 @@
           placeholder="Semana"
           style="margin-top:1rem"
           v-on:change="loadAssists()"
+          id="inputWeek"
         />
       </div>
     </div>
