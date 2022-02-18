@@ -1,3 +1,11 @@
+# Management app for university professors in "Universidad Tecnologica de la Habana" in Cuba
+
+Professors app for managing students assistance and evaluations
+
+Designed for mobile deployment using Apache Cordova / Phone Gap
+
+Uses Primevue (https://www.primefaces.org/primevue/showcase-v2/#/) as a UI components library
+
 # professors-cordova-vue
 
 ## Project setup
